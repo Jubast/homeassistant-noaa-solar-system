@@ -14,7 +14,7 @@ from homeassistant.const import CONF_HOST, CONF_SCAN_INTERVAL
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
-from .utils.gif_utils import save_png_gif_frame, create_gif, save_gif
+from .gif_utils import save_png_gif_frame, create_gif, save_gif
 from .common import (
     SUVI_304_IMAGES_DIRECTORY,
     LASCO_C3_IMAGES_DIRECTORY,
