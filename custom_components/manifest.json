@@ -1,11 +1,16 @@
 {
   "domain": "solarsystem",
   "name": "Solar System Scraper",
+  "documentation": "https://github.com/Jubast/homeassistant-noaa-solar-system",
+  "issue_tracker": "https://github.com/Jubast/homeassistant-noaa-solar-system/issues",
+  "version": "0.1.0",
   "codeowners": [
     "@jubast"
   ],
   "config_flow": true,
-  "after_dependencies": ["http"],
+  "after_dependencies": [
+    "http"
+  ],
   "integration_type": "hub",
   "iot_class": "cloud_polling"
 }
