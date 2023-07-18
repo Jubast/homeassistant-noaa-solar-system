@@ -1,0 +1,20 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Define your NOAA SolarSystemScraper settings",
+        "data": {
+          "host": "The NOAA host url",
+          "name": "The prefix to be used for your sensors",
+          "scan_interval": "The poll interval (in seconds) for sensor update requests"
+        }
+      }
+    },
+    "error": {
+      "already_configured": "[%key:common::config_flow::abort::already_configured_device%]"
+    },
+    "abort": {
+      "already_configured": "[%key:common::config_flow::abort::already_configured_device%]"
+    }
+  }
+}

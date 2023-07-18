@@ -1,0 +1,11 @@
+{
+  "domain": "solarsystem",
+  "name": "Solar System Scraper",
+  "codeowners": [
+    "@jubast"
+  ],
+  "config_flow": true,
+  "after_dependencies": ["http"],
+  "integration_type": "hub",
+  "iot_class": "cloud_polling"
+}
