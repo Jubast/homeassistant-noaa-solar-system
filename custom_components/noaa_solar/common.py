@@ -1,4 +1,4 @@
-"""Common data for the Solar System Scraper integration."""
+"""Common data for the NOAA Solar integration."""
 
 from os.path import join, dirname
 

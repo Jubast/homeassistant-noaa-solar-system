@@ -1,4 +1,4 @@
-"""The Solar System Scraper integration."""
+"""The NOAA Solar integration."""
 from __future__ import annotations
 from abc import abstractmethod
 from datetime import timedelta
@@ -6,7 +6,6 @@ import logging
 from typing import Any
 
 import aiohttp
-from asyncio import create_task
 
 from cachetools import TTLCache
 from homeassistant.config_entries import ConfigEntry
@@ -14,7 +13,7 @@ from homeassistant.const import CONF_HOST, CONF_SCAN_INTERVAL
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
-from .gif_utils import save_png_gif_frame, create_gif, save_gif
+from .utils.gif_utils import save_png_gif_frame, create_gif, save_gif
 from .common import (
     SUVI_304_IMAGES_DIRECTORY,
     LASCO_C3_IMAGES_DIRECTORY,

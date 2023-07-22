@@ -1,4 +1,4 @@
-"""Solar system gif utils."""
+"""NOAA Solar gif utils."""
 
 from hashlib import sha1
 

@@ -1,4 +1,4 @@
-"""Config flow for Solar System Scraper integration."""
+"""Config flow for NOAA Solar integration."""
 from __future__ import annotations
 from urllib.parse import ParseResult, urlparse
 

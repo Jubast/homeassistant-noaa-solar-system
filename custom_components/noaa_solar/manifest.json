@@ -1,6 +1,6 @@
 {
-  "domain": "solarsystem",
-  "name": "Solar System Scraper",
+  "domain": "solar",
+  "name": "NOAA Solar",
   "documentation": "https://github.com/Jubast/homeassistant-noaa-solar-system",
   "issue_tracker": "https://github.com/Jubast/homeassistant-noaa-solar-system/issues",
   "version": "0.1.0",

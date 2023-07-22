@@ -1,4 +1,4 @@
-"""The Solar System Scraper integration."""
+"""The NOAA Solar integration."""
 from __future__ import annotations
 from datetime import timedelta
 import logging
