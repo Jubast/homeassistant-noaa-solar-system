@@ -1,5 +1,9 @@
-# Repo specific
+# NOAA Solar specific
 data/
+
+# Home Assistant configuration
+config/*
+!config/configuration.yaml
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -1,4 +1,4 @@
-"""NOAA Solar gif utils."""
+"""NOAA Solar gif creation utils."""
 
 from hashlib import sha1
 
@@ -13,7 +13,7 @@ from PIL import Image
 
 
 def save_png_gif_frame(image: bytes, image_directory: str) -> bool:
-    """Saves a png image to the file system."""
+    """Save a png image to the file system if it doesn't already exist."""
 
     _ensure_directory_exists(image_directory)
     saved = _save_image_if_not_exists(image_directory, image)
@@ -24,7 +24,7 @@ def save_png_gif_frame(image: bytes, image_directory: str) -> bool:
 
 
 def create_gif(image_directory: str) -> bytes:
-    """Create a gif of images in the directory."""
+    """Create a gif of images in the provided image directory."""
 
     glob_path = join(image_directory, "*.png")
     glob_paths = glob(glob_path)
@@ -51,7 +51,7 @@ def create_gif(image_directory: str) -> bytes:
 
 
 def save_gif(directory: str, gif_name: str, data: bytes) -> None:
-    """Save a gif to the filesystem."""
+    """Save (override if already exist) a gif to the filesystem."""
 
     _ensure_directory_exists(directory)
     file_name = join(directory, gif_name)

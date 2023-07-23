@@ -1,5 +1,5 @@
 {
-    "name": "ludeeus/integration_blueprint",
+    "name": "jubast/homeassistant-noaa-solar-system",
     "image": "mcr.microsoft.com/vscode/devcontainers/python:0-3.10-bullseye",
     "postCreateCommand": "scripts/setup",
     "forwardPorts": [
@@ -15,9 +15,10 @@
         "vscode": {
             "extensions": [
                 "ms-python.python",
-                "github.vscode-pull-request-github",
-                "ryanluker.vscode-coverage-gutters",
-                "ms-python.vscode-pylance"
+                "ms-python.vscode-pylance",
+                "ms-python.pylint",
+                "ms-python.black-formatter",
+                "streetsidesoftware.code-spell-checker"
             ],
             "settings": {
                 "files.eol": "\n",
@@ -26,6 +27,9 @@
                 "python.analysis.autoSearchPaths": false,
                 "python.linting.pylintEnabled": true,
                 "python.linting.enabled": true,
+                "[python]": {
+                    "editor.defaultFormatter": "ms-python.black-formatter"
+                },
                 "python.formatting.provider": "black",
                 "python.formatting.blackPath": "/usr/local/py-utils/bin/black",
                 "editor.formatOnPaste": false,
@@ -35,8 +39,5 @@
             }
         }
     },
-    "remoteUser": "vscode",
-    "features": {
-        "ghcr.io/devcontainers/features/rust:1": {}
-    }
+    "remoteUser": "vscode"
 }

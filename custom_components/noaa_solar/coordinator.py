@@ -111,7 +111,7 @@ class NOAASolarLascoC3UpdateCoordinator(NOAASolarUpdateCoordinator):
 
 
 class NOAASpaceApi:
-    """NOAA API implementation"""
+    """NOAA API implementation."""
 
     def __init__(self, entry: ConfigEntry) -> None:
         """Initialize NOAA space api."""
@@ -120,83 +120,81 @@ class NOAASpaceApi:
         self.url = entry.data[CONF_HOST]
 
     async def fetch_solar_wind_mag_field(self) -> Any:
-        """Fetches solar wind mag"""
+        """Fetch solar wind mag data."""
         json = await self.get_json(
             self.url + "/products/summary/solar-wind-mag-field.json"
         )
         return json
 
     async def fetch_solar_wind_speed(self) -> Any:
-        """Fetches solar wind speed"""
+        """Fetch solar wind speed data."""
         json = await self.get_json(self.url + "/products/summary/solar-wind-speed.json")
         return json
 
     async def fetch_solar_activity_10_cm_flux(self) -> Any:
-        """Fetches solar activity (10cm flux)"""
+        """Fetch solar activity (10cm flux) data."""
         json = await self.get_json(self.url + "/products/summary/10cm-flux.json")
         return json
 
     async def fetch_suvi_primary_304_image(self) -> bytes:
-        """Fetches suvi primary 304 image"""
+        """Fetch suvi primary 304 image."""
         image = await self.get_image(
             self.url + "/images/animations/suvi/primary/304/latest.png"
         )
         return image
 
     async def fetch_lasco_c3_image(self) -> bytes:
-        """Fetches lasco c3 image"""
+        """Fetch lasco c3 image."""
         image = await self.get_image(
             self.url + "/images/animations/lasco-c3/latest.jpg"
         )
         return image
 
     def default_json_headers(self):
-        """Provides default request headers for fetching data from noaa api"""
+        """Prepare default request headers for fetching data from noaa api."""
         return {
             "Accept": "application/json",
-            "User-Agent": "Home Assistant Integration",
+            "User-Agent": "Home Assistant NOAA Solar Integration",
         }
 
     def default_image_headers(self):
-        """Provides default request headers for fetching data from noaa api"""
-        return {"Accept": "image/png", "User-Agent": "Home Assistant Integration"}
+        """Prepare default request headers for fetching data from noaa api."""
+        return {"Accept": "image/png", "User-Agent": "Home Assistant NOAA Solar Integration"}
 
     async def get_json(self, url: str) -> Any:
-        """HTTP request helper method"""
+        """HTTP request helper method."""
         cached = self.cache.get(url)
         if cached:
             return cached
 
-        async with aiohttp.ClientSession() as session:
-            async with session.get(
-                url,
-                headers=self.default_json_headers(),
-            ) as resp:
-                if resp.status == 200:
-                    json = await resp.json()
-                    self.cache[url] = json
-                    return json
+        async with aiohttp.ClientSession() as session, session.get(
+            url,
+            headers=self.default_json_headers(),
+        ) as resp:
+            if resp.status == 200:
+                json = await resp.json()
+                self.cache[url] = json
+                return json
 
-                raise UpdateFailed(
-                    f"Error retrieving data from url '{url}'. Response status code is '{resp.status}'"
-                )
+            raise UpdateFailed(
+                f"Error retrieving data from url '{url}'. Response status code is '{resp.status}'"
+            )
 
     async def get_image(self, url: str) -> bytes:
-        """HTTP request helper method"""
+        """HTTP request helper method."""
         cached = self.cache.get(url)
         if cached:
             return cached
 
-        async with aiohttp.ClientSession() as session:
-            async with session.get(
-                url,
-                headers=self.default_image_headers(),
-            ) as resp:
-                if resp.status == 200:
-                    data = await resp.read()
-                    self.cache[url] = data
-                    return data
+        async with aiohttp.ClientSession() as session, session.get(
+            url,
+            headers=self.default_image_headers(),
+        ) as resp:
+            if resp.status == 200:
+                data = await resp.read()
+                self.cache[url] = data
+                return data
 
-                raise UpdateFailed(
-                    f"Error retrieving data from url '{url}'. Response status code is '{resp.status}'"
-                )
+            raise UpdateFailed(
+                f"Error retrieving data from url '{url}'. Response status code is '{resp.status}'"
+            )

@@ -2,6 +2,13 @@
 from __future__ import annotations
 import logging
 
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.update_coordinator import (
+    CoordinatorEntity,
+)
+
 from . import (
     NOAASolarUpdateCoordinator,
     NOAASolarActivityUpdateCoordinator,
@@ -9,13 +16,6 @@ from . import (
     NOAASolarWindSpeedUpdateCoordinator,
     NOAASolarSuvi304UpdateCoordinator,
     NOAASolarLascoC3UpdateCoordinator,
-)
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant
-from homeassistant.components.camera import Camera
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.update_coordinator import (
-    CoordinatorEntity,
 )
 
 from .const import DOMAIN
@@ -28,7 +28,7 @@ async def async_setup_entry(
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Add entities."""
+    """Add NOAA Solar Sensor entities."""
     _LOGGER.info("Setup NOAA Space Sensor Entities")
 
     coordinators: dict[str, NOAASolarUpdateCoordinator] = hass.data[DOMAIN][
@@ -54,9 +54,10 @@ async def async_setup_entry(
 
 
 class NOAASolarWindSpeedEntity(CoordinatorEntity):
-    """Representation of solar data."""
+    """Representation of NOAA Solar windspeed data."""
 
     def __init__(self, coordinator: NOAASolarWindSpeedUpdateCoordinator) -> None:
+        """Initialize the NOAA Solar windspeed entity."""
         super().__init__(coordinator)
 
     @property
@@ -76,9 +77,10 @@ class NOAASolarWindSpeedEntity(CoordinatorEntity):
 
 
 class NOAASolarMagFieldBtEntity(CoordinatorEntity):
-    """Representation of solar data."""
+    """Representation NOAA Solar Magnetic Fields Bt data."""
 
     def __init__(self, coordinator: NOAASolarMagFieldUpdateCoordinator) -> None:
+        """Initialize the NOAA Solar Magnetic Fields Bt entity."""
         super().__init__(coordinator)
 
     @property
@@ -98,9 +100,10 @@ class NOAASolarMagFieldBtEntity(CoordinatorEntity):
 
 
 class NOAASolarMagFieldBzEntity(CoordinatorEntity):
-    """Representation of solar data."""
+    """Representation NOAA Solar Magnetic Fields Bz data."""
 
     def __init__(self, coordinator: NOAASolarMagFieldUpdateCoordinator) -> None:
+        """Initialize the NOAA Solar Magnetic fields Bz entity."""
         super().__init__(coordinator)
 
     @property
@@ -120,9 +123,10 @@ class NOAASolarMagFieldBzEntity(CoordinatorEntity):
 
 
 class NOAASolarActivityEntity(CoordinatorEntity):
-    """Representation of solar data."""
+    """Representation NOAA Solar activity data."""
 
     def __init__(self, coordinator: NOAASolarActivityUpdateCoordinator) -> None:
+        """Initialize the NOAA Solar activity entity."""
         super().__init__(coordinator)
 
     @property
@@ -142,9 +146,10 @@ class NOAASolarActivityEntity(CoordinatorEntity):
 
 
 class NOAASolarSuvi304Entity(CoordinatorEntity):
-    """Representation of solar data."""
+    """Representation of NOAA Suvi304 Primary images."""
 
     def __init__(self, coordinator: NOAASolarSuvi304UpdateCoordinator) -> None:
+        """Initialize the NOAA Solar Suvi304 entity."""
         super().__init__(coordinator)
 
     @property
@@ -159,9 +164,10 @@ class NOAASolarSuvi304Entity(CoordinatorEntity):
 
 
 class NOAASolarLascoC3Entity(CoordinatorEntity):
-    """Representation of solar data."""
+    """Representation of NOAA LascoC3 Primary images."""
 
     def __init__(self, coordinator: NOAASolarLascoC3UpdateCoordinator) -> None:
+        """Initialize the NOAA Solar LascoC3 entity."""
         super().__init__(coordinator)
 
     @property

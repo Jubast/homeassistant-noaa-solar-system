@@ -1,6 +1,5 @@
 """Config flow for NOAA Solar integration."""
 from __future__ import annotations
-from urllib.parse import ParseResult, urlparse
 
 import voluptuous as vol
 
