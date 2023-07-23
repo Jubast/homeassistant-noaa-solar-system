@@ -1,20 +1,20 @@
 {
   "domain": "noaa_solar",
   "name": "NOAA Solar",
-  "documentation": "https://github.com/Jubast/homeassistant-noaa-solar-system",
-  "issue_tracker": "https://github.com/Jubast/homeassistant-noaa-solar-system/issues",
-  "version": "0.1.0",
+  "after_dependencies": [
+    "http"
+  ],
   "codeowners": [
     "@jubast"
   ],
   "config_flow": true,
-  "after_dependencies": [
-    "http"
-  ],
+  "documentation": "https://github.com/Jubast/homeassistant-noaa-solar-system",
+  "integration_type": "hub",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/Jubast/homeassistant-noaa-solar-system/issues",
   "requirements": [
     "Pillow>=10.0.0",
     "cachetools>=5.3.0"
   ],
-  "integration_type": "hub",
-  "iot_class": "cloud_polling"
+  "version": "0.1.0"
 }
