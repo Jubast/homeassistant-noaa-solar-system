@@ -9,13 +9,11 @@ from homeassistant.helpers.update_coordinator import (
     CoordinatorEntity,
 )
 
-from . import (
+from .coordinator import (
     NOAASolarUpdateCoordinator,
     NOAASolarActivityUpdateCoordinator,
     NOAASolarMagFieldUpdateCoordinator,
     NOAASolarWindSpeedUpdateCoordinator,
-    NOAASolarSuvi304UpdateCoordinator,
-    NOAASolarLascoC3UpdateCoordinator,
 )
 
 from .const import DOMAIN
@@ -45,12 +43,6 @@ async def async_setup_entry(
 
         if isinstance(coordinator, NOAASolarActivityUpdateCoordinator):
             async_add_entities([NOAASolarActivityEntity(coordinator)], True)
-
-        if isinstance(coordinator, NOAASolarSuvi304UpdateCoordinator):
-            async_add_entities([NOAASolarSuvi304Entity(coordinator)], True)
-
-        if isinstance(coordinator, NOAASolarLascoC3UpdateCoordinator):
-            async_add_entities([NOAASolarLascoC3Entity(coordinator)], True)
 
 
 class NOAASolarWindSpeedEntity(CoordinatorEntity):
@@ -143,39 +135,3 @@ class NOAASolarActivityEntity(CoordinatorEntity):
     def unit_of_measurement(self) -> str:
         """Return unit of measurement."""
         return "sfu"
-
-
-class NOAASolarSuvi304Entity(CoordinatorEntity):
-    """Representation of NOAA Suvi304 Primary images."""
-
-    def __init__(self, coordinator: NOAASolarSuvi304UpdateCoordinator) -> None:
-        """Initialize the NOAA Solar Suvi304 entity."""
-        super().__init__(coordinator)
-
-    @property
-    def name(self) -> str:
-        """Return the name of the sensor."""
-        return "NOAA Space Weather - Suvi 304 Image"
-
-    @property
-    def state(self) -> int | None:
-        """Return the state of the sensor."""
-        return None
-
-
-class NOAASolarLascoC3Entity(CoordinatorEntity):
-    """Representation of NOAA LascoC3 Primary images."""
-
-    def __init__(self, coordinator: NOAASolarLascoC3UpdateCoordinator) -> None:
-        """Initialize the NOAA Solar LascoC3 entity."""
-        super().__init__(coordinator)
-
-    @property
-    def name(self) -> str:
-        """Return the name of the sensor."""
-        return "NOAA Space Weather - Lasco C3 Image"
-
-    @property
-    def state(self) -> int | None:
-        """Return the state of the sensor."""
-        return None

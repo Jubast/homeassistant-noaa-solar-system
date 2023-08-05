@@ -3,24 +3,13 @@ from __future__ import annotations
 from abc import abstractmethod
 from datetime import timedelta
 import logging
-from typing import Any
-
-import aiohttp
-
-from cachetools import TTLCache
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_HOST, CONF_SCAN_INTERVAL
 
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
-from .utils.gif_utils import save_png_gif_frame, create_gif, save_gif
-from .common import (
-    SUVI_304_IMAGES_DIRECTORY,
-    LASCO_C3_IMAGES_DIRECTORY,
-    SUVI_304_GIF_NAME,
-    LASCO_C3_GIF_NAME,
-    WWW_SOLARSYSTEM_GIFS_DIRECTORY,
-)
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+
+from .api import NOAASpaceApi
+from .utils.gif_utils import save_png_gif_frame, create_gif, Gif
+from .common import SUVI_304_IMAGES_DIRECTORY, LASCO_C3_IMAGES_DIRECTORY
 
 from .const import DOMAIN
 
@@ -31,12 +20,10 @@ class NOAASolarUpdateCoordinator(DataUpdateCoordinator):
     """Update handler."""
 
     def __init__(
-        self, hass: HomeAssistant, entry: ConfigEntry, api: NOAASpaceApi
+        self, hass: HomeAssistant, update_interval: timedelta, api: NOAASpaceApi
     ) -> None:
         """Initialize global data updater."""
         self.api = api
-
-        update_interval = timedelta(seconds=entry.data[CONF_SCAN_INTERVAL])
 
         super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=update_interval)
 
@@ -80,16 +67,15 @@ class NOAASolarSuvi304UpdateCoordinator(NOAASolarUpdateCoordinator):
     async def _fetch_data(self):
         """Fetch new data."""
         image = await self.api.fetch_suvi_primary_304_image()
-        saved = save_png_gif_frame(image, SUVI_304_IMAGES_DIRECTORY)
+        gif_frame = save_png_gif_frame(image, SUVI_304_IMAGES_DIRECTORY)
 
-        if not saved:
-            return None
+        if not gif_frame.saved:
+            return self.data
 
-        gif = create_gif(SUVI_304_IMAGES_DIRECTORY)
-        gif_directory = self.hass.config.path(WWW_SOLARSYSTEM_GIFS_DIRECTORY)
-        save_gif(gif_directory, SUVI_304_GIF_NAME, gif)
+        gif_data = create_gif(SUVI_304_IMAGES_DIRECTORY)
+        gif = Gif(gif_data, gif_frame.file_datetime)
 
-        return None
+        return gif
 
 
 class NOAASolarLascoC3UpdateCoordinator(NOAASolarUpdateCoordinator):
@@ -98,103 +84,12 @@ class NOAASolarLascoC3UpdateCoordinator(NOAASolarUpdateCoordinator):
     async def _fetch_data(self):
         """Fetch new data."""
         image = await self.api.fetch_lasco_c3_image()
-        saved = save_png_gif_frame(image, LASCO_C3_IMAGES_DIRECTORY)
+        gif_frame = save_png_gif_frame(image, LASCO_C3_IMAGES_DIRECTORY)
 
-        if not saved:
-            return None
+        if not gif_frame.saved:
+            return self.data
 
-        gif = create_gif(LASCO_C3_IMAGES_DIRECTORY)
-        gif_directory = self.hass.config.path(WWW_SOLARSYSTEM_GIFS_DIRECTORY)
-        save_gif(gif_directory, LASCO_C3_GIF_NAME, gif)
+        gif_data = create_gif(LASCO_C3_IMAGES_DIRECTORY)
+        gif = Gif(gif_data, gif_frame.file_datetime)
 
-        return None
-
-
-class NOAASpaceApi:
-    """NOAA API implementation."""
-
-    def __init__(self, entry: ConfigEntry) -> None:
-        """Initialize NOAA space api."""
-        # NOAA API always returns Cache-Control max-age:60, respect it and don't load their systems
-        self.cache = TTLCache(maxsize=5, ttl=60)
-        self.url = entry.data[CONF_HOST]
-
-    async def fetch_solar_wind_mag_field(self) -> Any:
-        """Fetch solar wind mag data."""
-        json = await self.get_json(
-            self.url + "/products/summary/solar-wind-mag-field.json"
-        )
-        return json
-
-    async def fetch_solar_wind_speed(self) -> Any:
-        """Fetch solar wind speed data."""
-        json = await self.get_json(self.url + "/products/summary/solar-wind-speed.json")
-        return json
-
-    async def fetch_solar_activity_10_cm_flux(self) -> Any:
-        """Fetch solar activity (10cm flux) data."""
-        json = await self.get_json(self.url + "/products/summary/10cm-flux.json")
-        return json
-
-    async def fetch_suvi_primary_304_image(self) -> bytes:
-        """Fetch suvi primary 304 image."""
-        image = await self.get_image(
-            self.url + "/images/animations/suvi/primary/304/latest.png"
-        )
-        return image
-
-    async def fetch_lasco_c3_image(self) -> bytes:
-        """Fetch lasco c3 image."""
-        image = await self.get_image(
-            self.url + "/images/animations/lasco-c3/latest.jpg"
-        )
-        return image
-
-    def default_json_headers(self):
-        """Prepare default request headers for fetching data from noaa api."""
-        return {
-            "Accept": "application/json",
-            "User-Agent": "Home Assistant NOAA Solar Integration",
-        }
-
-    def default_image_headers(self):
-        """Prepare default request headers for fetching data from noaa api."""
-        return {"Accept": "image/png", "User-Agent": "Home Assistant NOAA Solar Integration"}
-
-    async def get_json(self, url: str) -> Any:
-        """HTTP request helper method."""
-        cached = self.cache.get(url)
-        if cached:
-            return cached
-
-        async with aiohttp.ClientSession() as session, session.get(
-            url,
-            headers=self.default_json_headers(),
-        ) as resp:
-            if resp.status == 200:
-                json = await resp.json()
-                self.cache[url] = json
-                return json
-
-            raise UpdateFailed(
-                f"Error retrieving data from url '{url}'. Response status code is '{resp.status}'"
-            )
-
-    async def get_image(self, url: str) -> bytes:
-        """HTTP request helper method."""
-        cached = self.cache.get(url)
-        if cached:
-            return cached
-
-        async with aiohttp.ClientSession() as session, session.get(
-            url,
-            headers=self.default_image_headers(),
-        ) as resp:
-            if resp.status == 200:
-                data = await resp.read()
-                self.cache[url] = data
-                return data
-
-            raise UpdateFailed(
-                f"Error retrieving data from url '{url}'. Response status code is '{resp.status}'"
-            )
+        return gif

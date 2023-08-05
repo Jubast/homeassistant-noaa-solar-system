@@ -1,5 +1,4 @@
 # NOAA Solar
-## NOTE: THIS INTEGRATION IS WORK IN PROGRESS! THINGS WILL BREAK UNTILL A STABLE RELEASE IS RELEASED.
 
 [![GitHub Release][releases-shield]][releases]
 [![GitHub Activity][commits-shield]][commits]
@@ -8,19 +7,33 @@
 [![hacs][hacsbadge]][hacs]
 ![Project Maintenance][maintenance-shield]
 
-_Integration to integrate with Solar data from [NOAA Rest API][noaa_rest_api]._
+_Integration for Home Assistant to fetch Solar data from [NOAA Rest API][noaa_rest_api]._
 
 **This integration will set up the following platforms.**
 
 Platform | Description
 -- | --
-`sensor` | Show solar activity data.
-`image` | TODO: provide image entitiy with gifs of solar data
+`sensor` | Solar activity, wind and magnetic fields data.
+`image` | Gifs of solar objects (currently lasco_c3 and suvi_304 only)
 
-TODO: Add pictures of integration and better describe sensors, and how to install via HACS store.
-
+![Alt text](/images/dashboard.png "Solar Sensor and images.")
 
 ## Installation
+
+You can install the component using either the HACS add-on or manually.
+
+### HACS
+
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=Jubast&repository=homeassistant-noaa-solar-system&category=integration)
+
+Or:
+
+1. Go to you `HACS` integration, then `Integrations`.
+1. Click the three dots in the right upper corner, then `Custom Repositories`.
+1. Enter "Repository=`Jubast/homeassistant-noaa-solar-system`" and "Category=`Integration`".
+1. Press `Explore and download repositories` and search for `noaa solar`, then `Download`.
+
+### Manual Installation
 
 1. Using the tool of choice open the directory (folder) for your HA configuration (where you find `configuration.yaml`).
 1. If you do not have a `custom_components` directory (folder) there, you need to create it.
@@ -32,7 +45,12 @@ TODO: Add pictures of integration and better describe sensors, and how to instal
 
 ## Configuration is done in the UI
 
-<!---->
+Default settings should be fine for most use cases.
+
+1. Enter the url of the NOAA Rest API.
+1. Enter the poll interval.
+
+![Alt text](/images/configuration.png "Configuration example.")
 
 ## Contributions are welcome!
 
