@@ -16,7 +16,7 @@ class Gif:
     """GIF object."""
 
     def __init__(self, data: bytes, created: datetime) -> None:
-        """Initializes the GIF."""
+        """Initialize the GIF."""
         self.data = data
         self.created = created
 
@@ -25,7 +25,7 @@ class GifFrameRef:
     """GIF frame ref object."""
 
     def __init__(self, file_name: str, file_datetime: datetime, saved: bool) -> None:
-        """Initializes the GIF frame ref."""
+        """Initialize the GIF frame ref."""
         self.file_name = file_name
         self.file_datetime = file_datetime
         self.saved = saved
