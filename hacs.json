@@ -1,4 +1,8 @@
 {
     "name": "Solar System Scraper",
+    "zip_release": true,
+    "filename": "noaa_solar.zip",
+    "render_readme": true,
+    "hide_default_branch": true,
     "homeassistant": "2023.7.0"
 }

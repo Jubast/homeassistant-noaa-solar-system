@@ -1,7 +1,7 @@
 """The NOAA Solar integration."""
 from __future__ import annotations
 from abc import abstractmethod
-from datetime import timedelta
+from datetime import timedelta, datetime
 import logging
 
 from homeassistant.core import HomeAssistant
@@ -66,16 +66,29 @@ class NOAASolarSuvi304UpdateCoordinator(NOAASolarUpdateCoordinator):
 
     async def _fetch_data(self):
         """Fetch new data."""
+        current_gif: Gif = self.data
         image = await self.api.fetch_suvi_primary_304_image()
         gif_frame = save_png_gif_frame(image, SUVI_304_IMAGES_DIRECTORY)
 
-        if not gif_frame.saved:
-            return self.data
+        # nothing new, return created state
+        if current_gif and not gif_frame.saved:
+            return current_gif
 
-        gif_data = create_gif(SUVI_304_IMAGES_DIRECTORY)
-        gif = Gif(gif_data, gif_frame.file_datetime)
+        # handle case where gif was not yet created
+        if not current_gif:
+            gif_data = create_gif(SUVI_304_IMAGES_DIRECTORY)
+            gif = Gif(gif_data, gif_frame.file_datetime)
+            return gif
 
-        return gif
+        # check if a gif update is due
+        # (this is for perf reasons, no need to create a >10MB gif every 2 minutes..)
+        next_update_datetime = current_gif.created + timedelta(hours=12)
+        if datetime.now() > next_update_datetime:
+            gif_data = create_gif(SUVI_304_IMAGES_DIRECTORY)
+            gif = Gif(gif_data, gif_frame.file_datetime)
+            return gif
+
+        return current_gif
 
 
 class NOAASolarLascoC3UpdateCoordinator(NOAASolarUpdateCoordinator):
@@ -83,13 +96,26 @@ class NOAASolarLascoC3UpdateCoordinator(NOAASolarUpdateCoordinator):
 
     async def _fetch_data(self):
         """Fetch new data."""
+        current_gif: Gif = self.data
         image = await self.api.fetch_lasco_c3_image()
         gif_frame = save_png_gif_frame(image, LASCO_C3_IMAGES_DIRECTORY)
 
-        if not gif_frame.saved:
-            return self.data
+        # nothing new, return created state
+        if current_gif and not gif_frame.saved:
+            return current_gif
 
-        gif_data = create_gif(LASCO_C3_IMAGES_DIRECTORY)
-        gif = Gif(gif_data, gif_frame.file_datetime)
+        # handle case where gif was not yet created
+        if not current_gif:
+            gif_data = create_gif(LASCO_C3_IMAGES_DIRECTORY)
+            gif = Gif(gif_data, gif_frame.file_datetime)
+            return gif
 
-        return gif
+        # check if a gif update is due
+        # (this is for perf reasons, no need to create a >10MB gif every 2 minutes..)
+        next_update_datetime = current_gif.created + timedelta(hours=12)
+        if datetime.now() > next_update_datetime:
+            gif_data = create_gif(LASCO_C3_IMAGES_DIRECTORY)
+            gif = Gif(gif_data, gif_frame.file_datetime)
+            return gif
+
+        return current_gif

@@ -61,7 +61,7 @@ def create_gif(image_directory: str) -> bytes:
             format="GIF",
             append_images=imgs,
             save_all=True,
-            duration=200,
+            duration=100,
             optimize=True,
             loop=0,
         )
