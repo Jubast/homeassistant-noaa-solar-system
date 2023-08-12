@@ -72,7 +72,7 @@ class NOAASolarSuvi304UpdateCoordinator(NOAASolarUpdateCoordinator):
 
         # nothing new, return created state
         if current_gif and not gif_frame.saved:
-            return self.data
+            return current_gif
 
         # handle case where gif was not yet created
         if not current_gif:
@@ -102,7 +102,7 @@ class NOAASolarLascoC3UpdateCoordinator(NOAASolarUpdateCoordinator):
 
         # nothing new, return created state
         if current_gif and not gif_frame.saved:
-            return self.data
+            return current_gif
 
         # handle case where gif was not yet created
         if not current_gif:
