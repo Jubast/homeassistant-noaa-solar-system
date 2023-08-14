@@ -1,13 +1,10 @@
 # NOAA Solar
 
+[![hacs][hacsbadge]][hacs]
 [![GitHub Release][releases-shield]][releases]
-[![GitHub Activity][commits-shield]][commits]
 [![License][license-shield]](LICENSE)
 
-[![hacs][hacsbadge]][hacs]
-![Project Maintenance][maintenance-shield]
-
-_Integration for Home Assistant to fetch Solar data from [NOAA Rest API][noaa_rest_api]._
+_Integration for Home Assistant to fetch Solar data from [NOAA Rest API][noaa-rest-api]._
 
 **This integration will set up the following platforms.**
 
@@ -58,12 +55,9 @@ If you want to contribute to this please read the [Contribution guidelines](CONT
 
 ***
 
-[noaa_rest_api]: https://services.swpc.noaa.gov/
-[commits-shield]: https://img.shields.io/github/commit-activity/y/Jubast/homeassistant-noaa-solar-system.svg?style=for-the-badge
-[commits]: https://github.com/Jubast/homeassistant-noaa-solar-system/commits/main
+[noaa-rest-api]: https://services.swpc.noaa.gov/
 [hacs]: https://github.com/hacs/integration
-[hacsbadge]: https://img.shields.io/badge/HACS-Custom-orange.svg?style=for-the-badge
-[license-shield]: https://img.shields.io/github/license/ludeeus/integration_blueprint.svg?style=for-the-badge
-[maintenance-shield]: https://img.shields.io/badge/maintainer-jubast-blue.svg?style=for-the-badge
-[releases-shield]: https://img.shields.io/github/release/ludeeus/integration_blueprint.svg?style=for-the-badge
+[hacsbadge]: https://img.shields.io/badge/HACS-Integration-orange.svg
+[license-shield]: https://img.shields.io/github/license/Jubast/homeassistant-noaa-solar-system.svg
+[releases-shield]: https://img.shields.io/github/release/Jubast/homeassistant-noaa-solar-system.svg
 [releases]: https://github.com/Jubast/homeassistant-noaa-solar-system/releases
