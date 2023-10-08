@@ -20,7 +20,7 @@ from .const import (
 
 
 def data_schema(user_input: dict[str, Any]) -> vol.Schema:
-    """ "Prepare data schema for NOAA Solar configuration."""
+    """Prepare data schema for NOAA Solar configuration."""
     return vol.Schema(
         {
             vol.Required(
