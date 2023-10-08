@@ -1,0 +1,30 @@
+// cSpell Settings
+{
+    // Version of the setting file.  Always 0.2
+    "version": "0.2",
+    // language - current active spelling language
+    "language": "en",
+    "dictionaries": [
+        "bash",
+        "python",
+        "en_US",
+        "en-gb"
+    ],
+    // words - list of words to be always considered correct
+    "words": [
+        // vscode
+        "devcontainers",
+        // python
+        "pylance",
+        // homeassistant
+        "homeassistant",
+        "hass",
+        // homeassistant community store
+        "hacs",
+        // noaa solar repository
+        "jubast",
+        "noaa",
+        "suvi",
+        "lasco"
+    ]
+}

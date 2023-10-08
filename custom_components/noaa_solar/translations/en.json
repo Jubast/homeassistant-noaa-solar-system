@@ -9,7 +9,7 @@
         "step": {
             "user": {
                 "data": {
-                    "host": "The NOAA host urla",
+                    "host": "The NOAA host url",
                     "data_scan_interval": "The poll interval (in seconds) for sensor update requests",
                     "image_scan_interval": "The poll interval (in seconds) for image update requests"
                 },
