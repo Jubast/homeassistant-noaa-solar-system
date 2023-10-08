@@ -9,9 +9,9 @@
         "step": {
             "user": {
                 "data": {
-                    "host": "The NOAA host url",
-                    "name": "The prefix to be used for your sensors",
-                    "scan_interval": "The poll interval (in seconds) for sensor update requests"
+                    "host": "The NOAA host urla",
+                    "data_scan_interval": "The poll interval (in seconds) for sensor update requests",
+                    "image_scan_interval": "The poll interval (in seconds) for image update requests"
                 },
                 "title": "Define your NOAA Solar settings"
             }
