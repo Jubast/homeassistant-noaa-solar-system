@@ -46,10 +46,10 @@ async def async_setup_entry(
 
 
 class NOAASolarWindSpeedEntity(CoordinatorEntity):
-    """Representation of NOAA Solar windspeed data."""
+    """Representation of NOAA Solar wind speed data."""
 
     def __init__(self, coordinator: NOAASolarWindSpeedUpdateCoordinator) -> None:
-        """Initialize the NOAA Solar windspeed entity."""
+        """Initialize the NOAA Solar wind speed entity."""
         super().__init__(coordinator)
 
     @property
