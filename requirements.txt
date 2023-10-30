@@ -2,5 +2,5 @@
 homeassistant==2023.7.0
 pip>=21.0,<23.3
 ruff==0.0.291
-cachetools==5.3.1
+cachetools==5.3.2
 Pillow>=9.5.0
