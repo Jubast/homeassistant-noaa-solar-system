@@ -1,6 +1,7 @@
 {
     "name": "jubast/homeassistant-noaa-solar-system",
-    "image": "mcr.microsoft.com/vscode/devcontainers/python:0-3.11-bullseye",
+    "context": "..",
+    "dockerFile": "../Dockerfile",
     "postCreateCommand": "scripts/setup",
     "forwardPorts": [
         8123
