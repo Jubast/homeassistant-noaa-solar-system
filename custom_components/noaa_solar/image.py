@@ -1,4 +1,5 @@
 """Platform for image integration."""
+
 from __future__ import annotations
 from datetime import datetime
 import logging
@@ -17,7 +18,8 @@ from .coordinator import (
     NOAASolarLascoC3UpdateCoordinator,
 )
 
-from .utils.gif_utils import Gif
+from .utils.video_utils import Video
+from .utils.content_type_utils import get_content_type
 
 from .const import DOMAIN
 
@@ -62,12 +64,12 @@ class NOAASolarSuvi304Entity(ImageEntity, CoordinatorEntity):
     @property
     def content_type(self) -> str:
         """Image content type."""
-        return "image/gif"
+        return get_content_type(self.coordinator.video_format)
 
     @property
     def image_last_updated(self) -> datetime | None:
         """The time when the image was last updated."""
-        gif: Gif = self.coordinator.data
+        gif: Video = self.coordinator.data
         if not gif:
             return None
 
@@ -75,7 +77,7 @@ class NOAASolarSuvi304Entity(ImageEntity, CoordinatorEntity):
 
     def image(self) -> bytes | None:
         """Return bytes of image."""
-        gif: Gif = self.coordinator.data
+        gif: Video = self.coordinator.data
         if not gif:
             return None
 
@@ -100,21 +102,21 @@ class NOAASolarLascoC3Entity(ImageEntity, CoordinatorEntity):
     @property
     def content_type(self) -> str:
         """Image content type."""
-        return "image/gif"
+        return get_content_type(self.coordinator.video_format)
 
     @property
     def image_last_updated(self) -> datetime | None:
         """The time when the image was last updated."""
-        gif: Gif = self.coordinator.data
-        if not gif:
+        video: Video = self.coordinator.data
+        if not video:
             return None
 
-        return gif.created
+        return video.created
 
     def image(self) -> bytes | None:
         """Return bytes of image."""
-        gif: Gif = self.coordinator.data
-        if not gif:
+        video: Video = self.coordinator.data
+        if not video:
             return None
 
-        return gif.data
+        return video.data

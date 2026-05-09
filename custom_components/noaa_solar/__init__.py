@@ -1,4 +1,5 @@
 """The NOAA Solar integration."""
+
 from __future__ import annotations
 import logging
 from datetime import timedelta
@@ -21,6 +22,7 @@ from .const import (
     CONF_DATA_SCAN_INTERVAL,
     CONF_IMAGE_SCAN_INTERVAL,
     DEFAULT_IMAGE_SCAN_INTERVAL,
+    CONF_VIDEO_FORMAT,
 )
 
 PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.IMAGE]
@@ -34,6 +36,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     api_host = entry.data[CONF_HOST]
     api_data_interval = timedelta(seconds=entry.data[CONF_DATA_SCAN_INTERVAL])
     api_image_interval = timedelta(seconds=entry.data[CONF_IMAGE_SCAN_INTERVAL])
+    video_format = entry.data[CONF_VIDEO_FORMAT]
 
     api = NOAASpaceApi(api_host)
 
@@ -41,8 +44,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         "mag_field": NOAASolarMagFieldUpdateCoordinator(hass, api_data_interval, api),
         "wind_speed": NOAASolarWindSpeedUpdateCoordinator(hass, api_data_interval, api),
         "activity": NOAASolarActivityUpdateCoordinator(hass, api_data_interval, api),
-        "suvi_304": NOAASolarSuvi304UpdateCoordinator(hass, api_image_interval, api),
-        "lasco_c3": NOAASolarLascoC3UpdateCoordinator(hass, api_image_interval, api),
+        "suvi_304": NOAASolarSuvi304UpdateCoordinator(
+            hass, video_format, api_image_interval, api
+        ),
+        "lasco_c3": NOAASolarLascoC3UpdateCoordinator(
+            hass, video_format, api_image_interval, api
+        ),
     }
 
     for coordinator in coordinators.values():

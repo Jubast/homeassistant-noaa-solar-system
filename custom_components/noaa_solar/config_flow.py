@@ -1,4 +1,5 @@
 """Config flow for NOAA Solar integration."""
+
 from __future__ import annotations
 from typing import Any
 
@@ -13,9 +14,11 @@ from .const import (
     DEFAULT_IMAGE_SCAN_INTERVAL,
     DEFAULT_NAME,
     DEFAULT_HOST,
+    DEFAULT_VIDEO_FORMAT,
     DOMAIN,
     CONF_DATA_SCAN_INTERVAL,
     CONF_IMAGE_SCAN_INTERVAL,
+    CONF_VIDEO_FORMAT,
 )
 
 
@@ -38,6 +41,10 @@ def data_schema(user_input: dict[str, Any]) -> vol.Schema:
                     CONF_IMAGE_SCAN_INTERVAL, DEFAULT_DATA_SCAN_INTERVAL
                 ),
             ): int,
+            vol.Required(
+                CONF_VIDEO_FORMAT,
+                default=user_input.get(CONF_VIDEO_FORMAT, DEFAULT_VIDEO_FORMAT),
+            ): str,
         }
     )
 
@@ -48,6 +55,7 @@ def default_user_input() -> dict[str, Any]:
     user_input[CONF_HOST] = DEFAULT_HOST
     user_input[CONF_DATA_SCAN_INTERVAL] = DEFAULT_DATA_SCAN_INTERVAL
     user_input[CONF_IMAGE_SCAN_INTERVAL] = DEFAULT_IMAGE_SCAN_INTERVAL
+    user_input[CONF_VIDEO_FORMAT] = DEFAULT_VIDEO_FORMAT
     return user_input
 
 
@@ -61,6 +69,7 @@ def user_input_to_data(user_input: dict[str, Any]) -> Any:
     image_scan_interval = user_input.get(
         CONF_IMAGE_SCAN_INTERVAL, DEFAULT_IMAGE_SCAN_INTERVAL
     )
+    video_format = user_input.get(CONF_VIDEO_FORMAT, DEFAULT_VIDEO_FORMAT)
 
     host = host.strip("/")
 
@@ -68,6 +77,7 @@ def user_input_to_data(user_input: dict[str, Any]) -> Any:
         CONF_HOST: host,
         CONF_DATA_SCAN_INTERVAL: data_scan_interval,
         CONF_IMAGE_SCAN_INTERVAL: image_scan_interval,
+        CONF_VIDEO_FORMAT: video_format,
     }
 
 
