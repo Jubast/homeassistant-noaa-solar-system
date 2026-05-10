@@ -94,9 +94,38 @@ class NOAASolarVideoUpdateCoordinator(NOAASolarUpdateCoordinator):
         return os.path.join(self.video_directory, f"{self.stream_name}.{ext}")
 
     @abstractmethod
-    async def _fetch_data(self):
-        """Fetch the actual data."""
+    async def _fetch_image(self) -> bytes:
+        """Fetch the raw image bytes from the API."""
         raise NotImplementedError
+
+    async def _fetch_data(self):
+        """Fetch new data - shared logic for all video coordinators."""
+        image = await self._fetch_image()
+
+        video_frame = await self.hass.async_add_executor_job(
+            save_frame_to_disk, image, self.image_directory
+        )
+
+        needs_video = self._video_created is None or (
+            video_frame.saved
+            and datetime.now() > self._video_created + timedelta(hours=12)
+        )
+        video_path = self._video_path()
+        if needs_video:
+            await self.hass.async_add_executor_job(
+                create_video, self.video_format, self.image_directory, video_path
+            )
+            self._video_created = datetime.now()
+
+        return {
+            "latest_image": os.path.join(self.image_directory, "latest.png"),
+            "latest_image_updated": (
+                video_frame.file_datetime
+                if video_frame.saved
+                else (self.data or {}).get("latest_image_updated")
+            ),
+            "latest_video": video_path,
+        }
 
 
 class NOAASolarSuvi304UpdateCoordinator(NOAASolarVideoUpdateCoordinator):
@@ -104,30 +133,9 @@ class NOAASolarSuvi304UpdateCoordinator(NOAASolarVideoUpdateCoordinator):
 
     stream_name = "suvi_304"
 
-    async def _fetch_data(self):
-        """Fetch new data."""
-        image = await self.api.fetch_suvi_primary_304_image()
-
-        video_frame = save_frame_to_disk(image, self.image_directory)
-
-        needs_video = self._video_created is None or (
-            video_frame.saved
-            and datetime.now() > self._video_created + timedelta(hours=12)
-        )
-        video_path = self._video_path()
-        if needs_video:
-            create_video(self.video_format, self.image_directory, video_path)
-            self._video_created = datetime.now()
-
-        return {
-            "latest_image": os.path.join(self.image_directory, "latest.png"),
-            "latest_image_updated": (
-                video_frame.file_datetime
-                if video_frame.saved
-                else (self.data or {}).get("latest_image_updated")
-            ),
-            "latest_video": video_path,
-        }
+    async def _fetch_image(self) -> bytes:
+        """Fetch the latest SUVI 304 image."""
+        return await self.api.fetch_suvi_primary_304_image()
 
 
 class NOAASolarLascoC3UpdateCoordinator(NOAASolarVideoUpdateCoordinator):
@@ -135,27 +143,6 @@ class NOAASolarLascoC3UpdateCoordinator(NOAASolarVideoUpdateCoordinator):
 
     stream_name = "lasco_c3"
 
-    async def _fetch_data(self):
-        """Fetch new data."""
-        image = await self.api.fetch_lasco_c3_image()
-
-        video_frame = save_frame_to_disk(image, self.image_directory)
-
-        needs_video = self._video_created is None or (
-            video_frame.saved
-            and datetime.now() > self._video_created + timedelta(hours=12)
-        )
-        video_path = self._video_path()
-        if needs_video:
-            create_video(self.video_format, self.image_directory, video_path)
-            self._video_created = datetime.now()
-
-        return {
-            "latest_image": os.path.join(self.image_directory, "latest.png"),
-            "latest_image_updated": (
-                video_frame.file_datetime
-                if video_frame.saved
-                else (self.data or {}).get("latest_image_updated")
-            ),
-            "latest_video": video_path,
-        }
+    async def _fetch_image(self) -> bytes:
+        """Fetch the latest LASCO C3 image."""
+        return await self.api.fetch_lasco_c3_image()

@@ -7,6 +7,7 @@ from datetime import timedelta
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform, CONF_HOST, CONF_SCAN_INTERVAL
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import ConfigEntryNotReady
 
 from .api import NOAASpaceApi
 from .coordinator import (
@@ -41,7 +42,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     api = NOAASpaceApi(api_host)
 
-    noaa_media_dir = os.path.join(hass.config.media_dirs["local"], "noaa_solar")
+    local_media_dir = hass.config.media_dirs.get("local")
+    if local_media_dir is None:
+        raise ConfigEntryNotReady(
+            "No 'local' media source configured. Add 'media_dirs: local: /path/to/media'"
+            " to your Home Assistant configuration.yaml."
+        )
+    noaa_media_dir = os.path.join(local_media_dir, "noaa_solar")
     images_dir = os.path.join(noaa_media_dir, "images")
     videos_dir = os.path.join(noaa_media_dir, "videos")
 
@@ -107,6 +114,8 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry):
         _LOGGER.info("Migrating NOAA Solar integration from version 2 to 3")
 
         new_data = {**config_entry.data}
+        # Default to "GIF" to preserve previous behaviour for existing users.
+        # New installations use DEFAULT_VIDEO_FORMAT ("MP4").
         new_data.setdefault(CONF_VIDEO_FORMAT, "GIF")
         config_entry.version = 3
         hass.config_entries.async_update_entry(config_entry, data=new_data)

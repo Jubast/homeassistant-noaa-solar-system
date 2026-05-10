@@ -1,5 +1,6 @@
 """NOAA Solar video creation utils."""
 
+import logging
 import os
 import subprocess
 from io import BytesIO
@@ -8,7 +9,9 @@ import tempfile
 
 from PIL import Image
 
-from custom_components.noaa_solar.utils.image_utils import list_frames_from_disk
+from .image_utils import list_frames_from_disk
+
+_LOGGER = logging.getLogger(__name__)
 
 
 def create_video(
@@ -73,6 +76,12 @@ def _create_mp4_video(image_directory: str, video_path: str) -> None:
             capture_output=True,
         )
         os.replace(tmp_path, video_path)
+    except subprocess.CalledProcessError as err:
+        stderr = err.stderr.decode(errors="replace") if err.stderr else ""
+        _LOGGER.error("ffmpeg failed (exit %d): %s", err.returncode, stderr)
+        if os.path.exists(tmp_path):
+            os.remove(tmp_path)
+        raise
     except Exception:
         if os.path.exists(tmp_path):
             os.remove(tmp_path)
@@ -85,6 +94,9 @@ def _create_mp4_video(image_directory: str, video_path: str) -> None:
 def _create_gif_video(image_directory: str, video_path: str) -> None:
     """Generate a GIF from the saved frames and write it to video_path."""
     frames = list_frames_from_disk(image_directory)
+
+    if not frames:
+        return
 
     with ExitStack() as stack:
         imgs = (stack.enter_context(Image.open(f)) for f in frames)
