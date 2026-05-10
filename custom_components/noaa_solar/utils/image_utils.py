@@ -1,5 +1,7 @@
 """NOAA Solar image creation utils."""
 
+import os
+import tempfile
 from hashlib import sha1
 from glob import glob
 from os import makedirs, remove
@@ -18,12 +20,11 @@ class FrameRef:
 
 
 def list_frames_from_disk(image_directory: str) -> list[str]:
-    """Returns sorted (by datetime) images stored on the file system"""
+    """Returns sorted (by datetime) images stored on the file system."""
     glob_path = join(image_directory, "*.png")
-    glob_paths = glob(glob_path)
-    sorted_glob_paths = sorted(glob_paths, key=_get_datetime_from_filename)
-
-    return sorted_glob_paths
+    # Exclude latest.png — it doesn't follow the hash_datetime naming scheme.
+    glob_paths = [p for p in glob(glob_path) if basename(p) != "latest.png"]
+    return sorted(glob_paths, key=_get_datetime_from_filename)
 
 
 def save_frame_to_disk(image: bytes, image_directory: str) -> FrameRef:
@@ -33,6 +34,7 @@ def save_frame_to_disk(image: bytes, image_directory: str) -> FrameRef:
     gif_frame = _save_image_if_not_exists(image_directory, image)
 
     if gif_frame.saved:
+        _update_latest(image_directory, image)
         _remove_excess_images(image_directory)
 
     return gif_frame
@@ -62,6 +64,17 @@ def _ensure_directory_exists(directory: str) -> None:
     makedirs(directory, exist_ok=True)
 
 
+def _update_latest(image_directory: str, data: bytes) -> None:
+    """Atomically overwrite latest.png with the newest frame."""
+    latest_path = join(image_directory, "latest.png")
+    with tempfile.NamedTemporaryFile(
+        dir=image_directory, delete=False, suffix=".tmp"
+    ) as tf:
+        tf.write(data)
+        tmp_path = tf.name
+    os.replace(tmp_path, latest_path)
+
+
 def _get_datetime_from_filename(file_path: str) -> datetime:
     file_name = basename(file_path)
     datetime_string = file_name.split("_")[1].split(".")[0]
@@ -70,7 +83,7 @@ def _get_datetime_from_filename(file_path: str) -> datetime:
 
 def _remove_excess_images(directory: str) -> None:
     glob_path = join(directory, "*.png")
-    glob_paths = glob(glob_path)
+    glob_paths = [p for p in glob(glob_path) if basename(p) != "latest.png"]
     sorted_glob_paths = sorted(glob_paths, key=_get_datetime_from_filename)
 
     max_images = 60

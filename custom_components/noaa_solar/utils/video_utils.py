@@ -1,80 +1,91 @@
 """NOAA Solar video creation utils."""
 
-from os.path import join
-from datetime import datetime
-from io import BytesIO
+import os
 import subprocess
+from io import BytesIO
 from contextlib import ExitStack
-from PIL import Image
 import tempfile
+
+from PIL import Image
 
 from custom_components.noaa_solar.utils.image_utils import list_frames_from_disk
 
 
-class Video:
-    """Video object."""
-
-    def __init__(self, video_format: str, data: bytes, created: datetime) -> None:
-        """Initialize the Video."""
-        self.video_format = video_format
-        self.data = data
-        self.created = created
-
-
 def create_video(
-    video_format: str, image_directory: str, last_image_created: datetime
-) -> Video:
-    """Generate a Video from the saved frames."""
+    video_format: str,
+    image_directory: str,
+    video_path: str,
+) -> None:
+    """Generate a video from the saved frames and write it to video_path."""
+    os.makedirs(os.path.dirname(video_path), exist_ok=True)
 
-    video = None
     if video_format == "MP4":
-        video = Video(
-            video_format, _create_mp4_video(image_directory), last_image_created
-        )
+        _create_mp4_video(image_directory, video_path)
     else:
-        video = Video(
-            video_format, _create_gif_video(image_directory), last_image_created
-        )
-
-    return video
+        _create_gif_video(image_directory, video_path)
 
 
-def _create_mp4_video(image_directory: str) -> bytes:
-    """Generate a MP4 from the saved frames."""
-
-    #########
-    ### TODO LEFT HERE, chek with chat4gpt
-    ###########
-    video_stream = BytesIO()
-
-    # Set the first image to determine the size (if not provided)
-    if not width or not height:
-        first_image = images[0]
-        height, width, _ = first_image.shape
-
-    # Initialize OpenCV VideoWriter to write the video to the in-memory stream
-    fourcc = cv2.VideoWriter_fourcc(*"mp4v")  # Use 'mp4v' for MP4
-    video_writer = cv2.VideoWriter(video_stream, fourcc, fps, (width, height))
-
-    # Add each image to the video stream
-    for image in images:
-        video_writer.write(image)
-
-    # Release the video writer (important for closing the stream)
-    video_writer.release()
-
-    # Get the video content from the memory stream
-    video_stream.seek(0)  # Move to the start of the stream
-    video_data = video_stream.read()  # Read all video data into memory
-
-    return video_data
-
-
-def _create_gif_video(image_directory: str) -> None:
-    """Generate a GIF from the saved frames."""
+def _create_mp4_video(image_directory: str, video_path: str) -> None:
+    """Generate a browser-compatible H.264 MP4 from the saved frames using ffmpeg."""
     frames = list_frames_from_disk(image_directory)
 
-    gif = None
+    if not frames:
+        return
+
+    # Write a temporary file listing all frames in order (ffmpeg concat demuxer)
+    with tempfile.NamedTemporaryFile(
+        mode="w", suffix=".txt", delete=False, dir=os.path.dirname(video_path)
+    ) as list_file:
+        list_path = list_file.name
+        for frame in frames:
+            list_file.write(f"file '{frame}'\n")
+            list_file.write("duration 0.1\n")  # 10 fps
+
+    with tempfile.NamedTemporaryFile(
+        suffix=".mp4", delete=False, dir=os.path.dirname(video_path)
+    ) as tmp_file:
+        tmp_path = tmp_file.name
+
+    try:
+        subprocess.run(
+            [
+                "ffmpeg",
+                "-y",  # overwrite without asking
+                "-f",
+                "concat",
+                "-safe",
+                "0",
+                "-i",
+                list_path,
+                "-vf",
+                "pad=ceil(iw/2)*2:ceil(ih/2)*2",  # ensure even dimensions for H.264
+                "-c:v",
+                "libx264",
+                "-preset",
+                "fast",
+                "-pix_fmt",
+                "yuv420p",  # required for broad browser compatibility
+                "-movflags",
+                "+faststart",  # enable streaming / playback before full download
+                tmp_path,
+            ],
+            check=True,
+            capture_output=True,
+        )
+        os.replace(tmp_path, video_path)
+    except Exception:
+        if os.path.exists(tmp_path):
+            os.remove(tmp_path)
+        raise
+    finally:
+        if os.path.exists(list_path):
+            os.remove(list_path)
+
+
+def _create_gif_video(image_directory: str, video_path: str) -> None:
+    """Generate a GIF from the saved frames and write it to video_path."""
+    frames = list_frames_from_disk(image_directory)
+
     with ExitStack() as stack:
         imgs = (stack.enter_context(Image.open(f)) for f in frames)
         img = next(imgs)
@@ -89,6 +100,12 @@ def _create_gif_video(image_directory: str) -> None:
             optimize=True,
             loop=0,
         )
-        gif = gif_memory.getbuffer().tobytes()
+        gif_bytes = gif_memory.getbuffer().tobytes()
 
-    return gif
+    with tempfile.NamedTemporaryFile(
+        suffix=".gif", delete=False, dir=os.path.dirname(video_path)
+    ) as tmp_file:
+        tmp_path = tmp_file.name
+        tmp_file.write(gif_bytes)
+
+    os.replace(tmp_path, video_path)

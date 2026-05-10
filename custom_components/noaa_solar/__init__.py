@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 import logging
+import os
 from datetime import timedelta
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform, CONF_HOST, CONF_SCAN_INTERVAL
@@ -40,15 +41,29 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     api = NOAASpaceApi(api_host)
 
+    noaa_media_dir = os.path.join(hass.config.media_dirs["local"], "noaa_solar")
+    images_dir = os.path.join(noaa_media_dir, "images")
+    videos_dir = os.path.join(noaa_media_dir, "videos")
+
     coordinators: dict[str, NOAASolarUpdateCoordinator] = {
         "mag_field": NOAASolarMagFieldUpdateCoordinator(hass, api_data_interval, api),
         "wind_speed": NOAASolarWindSpeedUpdateCoordinator(hass, api_data_interval, api),
         "activity": NOAASolarActivityUpdateCoordinator(hass, api_data_interval, api),
         "suvi_304": NOAASolarSuvi304UpdateCoordinator(
-            hass, video_format, api_image_interval, api
+            hass,
+            video_format,
+            os.path.join(images_dir, "suvi_304"),
+            videos_dir,
+            api_image_interval,
+            api,
         ),
         "lasco_c3": NOAASolarLascoC3UpdateCoordinator(
-            hass, video_format, api_image_interval, api
+            hass,
+            video_format,
+            os.path.join(images_dir, "lasco_c3"),
+            videos_dir,
+            api_image_interval,
+            api,
         ),
     }
 
@@ -56,6 +71,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         await coordinator.async_config_entry_first_refresh()
 
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = coordinators
+
+    _LOGGER.info(
+        "NOAA Solar media available via HA media browser: local/noaa_solar/videos/",
+    )
+
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     return True
@@ -74,13 +94,19 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry):
     """Migrations for config flow configuration."""
 
     if config_entry.version == 1:
-        _LOGGER.info("Migrating NOAA Solar integration")
+        _LOGGER.info("Migrating NOAA Solar integration from version 1 to 2")
 
         new_data = {**config_entry.data}
         new_data[CONF_DATA_SCAN_INTERVAL] = config_entry.data[CONF_SCAN_INTERVAL]
         new_data[CONF_IMAGE_SCAN_INTERVAL] = DEFAULT_IMAGE_SCAN_INTERVAL
         new_data.pop(CONF_SCAN_INTERVAL)
-        config_entry.version = 2
-        hass.config_entries.async_update_entry(config_entry, data=new_data)
+        hass.config_entries.async_update_entry(config_entry, data=new_data, version=2)
+
+    if config_entry.version == 2:
+        _LOGGER.info("Migrating NOAA Solar integration from version 2 to 3")
+
+        new_data = {**config_entry.data}
+        new_data.setdefault(CONF_VIDEO_FORMAT, "GIF")
+        hass.config_entries.async_update_entry(config_entry, data=new_data, version=3)
 
     return True

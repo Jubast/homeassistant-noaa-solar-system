@@ -1,5 +1,5 @@
-# NOAA Solar specific
-data/
+# Homeassistant
+config
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

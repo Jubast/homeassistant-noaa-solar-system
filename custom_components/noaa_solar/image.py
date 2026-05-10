@@ -18,9 +18,6 @@ from .coordinator import (
     NOAASolarLascoC3UpdateCoordinator,
 )
 
-from .utils.video_utils import Video
-from .utils.content_type_utils import get_content_type
-
 from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
@@ -63,25 +60,25 @@ class NOAASolarSuvi304Entity(ImageEntity, CoordinatorEntity):
 
     @property
     def content_type(self) -> str:
-        """Image content type."""
-        return get_content_type(self.coordinator.video_format)
+        return "image/png"
 
     @property
     def image_last_updated(self) -> datetime | None:
-        """The time when the image was last updated."""
-        gif: Video = self.coordinator.data
-        if not gif:
+        """The time when the latest frame was downloaded."""
+        if not self.coordinator.data:
             return None
-
-        return gif.created
+        return self.coordinator.data.get("latest_image_updated")
 
     def image(self) -> bytes | None:
-        """Return bytes of image."""
-        gif: Video = self.coordinator.data
-        if not gif:
+        """Return bytes of the latest downloaded frame."""
+        if not self.coordinator.data:
             return None
-
-        return gif.data
+        latest = self.coordinator.data["latest_image"]
+        try:
+            with open(latest, "rb") as f:
+                return f.read()
+        except FileNotFoundError:
+            return None
 
 
 class NOAASolarLascoC3Entity(ImageEntity, CoordinatorEntity):
@@ -101,22 +98,22 @@ class NOAASolarLascoC3Entity(ImageEntity, CoordinatorEntity):
 
     @property
     def content_type(self) -> str:
-        """Image content type."""
-        return get_content_type(self.coordinator.video_format)
+        return "image/png"
 
     @property
     def image_last_updated(self) -> datetime | None:
-        """The time when the image was last updated."""
-        video: Video = self.coordinator.data
-        if not video:
+        """The time when the latest frame was downloaded."""
+        if not self.coordinator.data:
             return None
-
-        return video.created
+        return self.coordinator.data.get("latest_image_updated")
 
     def image(self) -> bytes | None:
-        """Return bytes of image."""
-        video: Video = self.coordinator.data
-        if not video:
+        """Return bytes of the latest downloaded frame."""
+        if not self.coordinator.data:
             return None
-
-        return video.data
+        latest = self.coordinator.data["latest_image"]
+        try:
+            with open(latest, "rb") as f:
+                return f.read()
+        except FileNotFoundError:
+            return None

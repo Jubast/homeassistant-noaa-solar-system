@@ -8,6 +8,11 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.const import CONF_HOST
 from homeassistant.data_entry_flow import FlowResult
+from homeassistant.helpers.selector import (
+    SelectSelector,
+    SelectSelectorConfig,
+    SelectSelectorMode,
+)
 
 from .const import (
     DEFAULT_DATA_SCAN_INTERVAL,
@@ -20,6 +25,8 @@ from .const import (
     CONF_IMAGE_SCAN_INTERVAL,
     CONF_VIDEO_FORMAT,
 )
+
+VIDEO_FORMAT_OPTIONS = ["GIF", "MP4"]
 
 
 def data_schema(user_input: dict[str, Any]) -> vol.Schema:
@@ -38,13 +45,18 @@ def data_schema(user_input: dict[str, Any]) -> vol.Schema:
             vol.Required(
                 CONF_IMAGE_SCAN_INTERVAL,
                 default=user_input.get(
-                    CONF_IMAGE_SCAN_INTERVAL, DEFAULT_DATA_SCAN_INTERVAL
+                    CONF_IMAGE_SCAN_INTERVAL, DEFAULT_IMAGE_SCAN_INTERVAL
                 ),
             ): int,
             vol.Required(
                 CONF_VIDEO_FORMAT,
                 default=user_input.get(CONF_VIDEO_FORMAT, DEFAULT_VIDEO_FORMAT),
-            ): str,
+            ): SelectSelector(
+                SelectSelectorConfig(
+                    options=VIDEO_FORMAT_OPTIONS,
+                    mode=SelectSelectorMode.LIST,
+                )
+            ),
         }
     )
 
@@ -84,7 +96,7 @@ def user_input_to_data(user_input: dict[str, Any]) -> Any:
 class NOAASolarConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle config flow for NOAA Solar integration."""
 
-    VERSION = 2
+    VERSION = 3
 
     def __init__(self) -> None:
         """Initialize the config flow."""
