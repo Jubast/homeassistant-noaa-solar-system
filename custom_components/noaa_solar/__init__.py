@@ -100,13 +100,15 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry):
         new_data[CONF_DATA_SCAN_INTERVAL] = config_entry.data[CONF_SCAN_INTERVAL]
         new_data[CONF_IMAGE_SCAN_INTERVAL] = DEFAULT_IMAGE_SCAN_INTERVAL
         new_data.pop(CONF_SCAN_INTERVAL)
-        hass.config_entries.async_update_entry(config_entry, data=new_data, version=2)
+        config_entry.version = 2
+        hass.config_entries.async_update_entry(config_entry, data=new_data)
 
     if config_entry.version == 2:
         _LOGGER.info("Migrating NOAA Solar integration from version 2 to 3")
 
         new_data = {**config_entry.data}
         new_data.setdefault(CONF_VIDEO_FORMAT, "GIF")
-        hass.config_entries.async_update_entry(config_entry, data=new_data, version=3)
+        config_entry.version = 3
+        hass.config_entries.async_update_entry(config_entry, data=new_data)
 
     return True
