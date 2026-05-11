@@ -1,4 +1,5 @@
 """Platform for image integration."""
+
 from __future__ import annotations
 from datetime import datetime
 import logging
@@ -16,8 +17,6 @@ from .coordinator import (
     NOAASolarSuvi304UpdateCoordinator,
     NOAASolarLascoC3UpdateCoordinator,
 )
-
-from .utils.gif_utils import Gif
 
 from .const import DOMAIN
 
@@ -61,25 +60,26 @@ class NOAASolarSuvi304Entity(ImageEntity, CoordinatorEntity):
 
     @property
     def content_type(self) -> str:
-        """Image content type."""
-        return "image/gif"
+        """Return the content type."""
+        return "image/png"
 
     @property
     def image_last_updated(self) -> datetime | None:
-        """The time when the image was last updated."""
-        gif: Gif = self.coordinator.data
-        if not gif:
+        """The time when the latest frame was downloaded."""
+        if not self.coordinator.data:
             return None
-
-        return gif.created
+        return self.coordinator.data.get("latest_image_updated")
 
     def image(self) -> bytes | None:
-        """Return bytes of image."""
-        gif: Gif = self.coordinator.data
-        if not gif:
+        """Return bytes of the latest downloaded frame."""
+        if not self.coordinator.data:
             return None
-
-        return gif.data
+        latest = self.coordinator.data["latest_image"]
+        try:
+            with open(latest, "rb") as f:
+                return f.read()
+        except FileNotFoundError:
+            return None
 
 
 class NOAASolarLascoC3Entity(ImageEntity, CoordinatorEntity):
@@ -99,22 +99,23 @@ class NOAASolarLascoC3Entity(ImageEntity, CoordinatorEntity):
 
     @property
     def content_type(self) -> str:
-        """Image content type."""
-        return "image/gif"
+        """Return the content type."""
+        return "image/png"
 
     @property
     def image_last_updated(self) -> datetime | None:
-        """The time when the image was last updated."""
-        gif: Gif = self.coordinator.data
-        if not gif:
+        """The time when the latest frame was downloaded."""
+        if not self.coordinator.data:
             return None
-
-        return gif.created
+        return self.coordinator.data.get("latest_image_updated")
 
     def image(self) -> bytes | None:
-        """Return bytes of image."""
-        gif: Gif = self.coordinator.data
-        if not gif:
+        """Return bytes of the latest downloaded frame."""
+        if not self.coordinator.data:
             return None
-
-        return gif.data
+        latest = self.coordinator.data["latest_image"]
+        try:
+            with open(latest, "rb") as f:
+                return f.read()
+        except FileNotFoundError:
+            return None

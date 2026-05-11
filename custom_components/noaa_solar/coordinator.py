@@ -1,5 +1,7 @@
 """The NOAA Solar integration."""
+
 from __future__ import annotations
+import os
 from abc import abstractmethod
 from datetime import timedelta, datetime
 import logging
@@ -8,8 +10,8 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .api import NOAASpaceApi
-from .utils.gif_utils import save_png_gif_frame, create_gif, Gif
-from .common import SUVI_304_IMAGES_DIRECTORY, LASCO_C3_IMAGES_DIRECTORY
+from .utils.image_utils import save_frame_to_disk
+from .utils.video_utils import create_video
 
 from .const import DOMAIN
 
@@ -42,7 +44,9 @@ class NOAASolarMagFieldUpdateCoordinator(NOAASolarUpdateCoordinator):
 
     async def _fetch_data(self):
         """Fetch new data."""
-        return await self.api.fetch_solar_wind_mag_field()
+        data = await self.api.fetch_solar_wind_mag_field()
+        entry = data[0]
+        return {"Bt": entry["bt"], "Bz": entry["bz_gsm"]}
 
 
 class NOAASolarWindSpeedUpdateCoordinator(NOAASolarUpdateCoordinator):
@@ -50,7 +54,8 @@ class NOAASolarWindSpeedUpdateCoordinator(NOAASolarUpdateCoordinator):
 
     async def _fetch_data(self):
         """Fetch new data."""
-        return await self.api.fetch_solar_wind_speed()
+        data = await self.api.fetch_solar_wind_speed()
+        return {"WindSpeed": data[0]["proton_speed"]}
 
 
 class NOAASolarActivityUpdateCoordinator(NOAASolarUpdateCoordinator):
@@ -58,64 +63,86 @@ class NOAASolarActivityUpdateCoordinator(NOAASolarUpdateCoordinator):
 
     async def _fetch_data(self):
         """Fetch new data."""
-        return await self.api.fetch_solar_activity_10_cm_flux()
+        data = await self.api.fetch_solar_activity_10_cm_flux()
+        return {"Flux": data[0]["flux"]}
 
 
-class NOAASolarSuvi304UpdateCoordinator(NOAASolarUpdateCoordinator):
-    """Update handler."""
+class NOAASolarVideoUpdateCoordinator(NOAASolarUpdateCoordinator):
+    """Update handler for videos."""
+
+    stream_name: str  # defined by each subclass
+
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        video_format: str,
+        image_directory: str,
+        video_directory: str,
+        update_interval: timedelta,
+        api: NOAASpaceApi,
+    ) -> None:
+        """Initialize global data updater."""
+        self.video_format = video_format
+        self.image_directory = image_directory
+        self.video_directory = video_directory
+        self._video_created: datetime | None = None
+
+        super().__init__(hass, update_interval, api)
+
+    def _video_path(self) -> str:
+        ext = "mp4" if self.video_format == "MP4" else "gif"
+        return os.path.join(self.video_directory, f"{self.stream_name}.{ext}")
+
+    @abstractmethod
+    async def _fetch_image(self) -> bytes:
+        """Fetch the raw image bytes from the API."""
+        raise NotImplementedError
 
     async def _fetch_data(self):
-        """Fetch new data."""
-        current_gif: Gif = self.data
-        image = await self.api.fetch_suvi_primary_304_image()
-        gif_frame = save_png_gif_frame(image, SUVI_304_IMAGES_DIRECTORY)
+        """Fetch new data - shared logic for all video coordinators."""
+        image = await self._fetch_image()
 
-        # nothing new, return created state
-        if current_gif and not gif_frame.saved:
-            return current_gif
+        video_frame = await self.hass.async_add_executor_job(
+            save_frame_to_disk, image, self.image_directory
+        )
 
-        # handle case where gif was not yet created
-        if not current_gif:
-            gif_data = create_gif(SUVI_304_IMAGES_DIRECTORY)
-            gif = Gif(gif_data, gif_frame.file_datetime)
-            return gif
+        needs_video = self._video_created is None or (
+            video_frame.saved
+            and datetime.now() > self._video_created + timedelta(hours=12)
+        )
+        video_path = self._video_path()
+        if needs_video:
+            await self.hass.async_add_executor_job(
+                create_video, self.video_format, self.image_directory, video_path
+            )
+            self._video_created = datetime.now()
 
-        # check if a gif update is due
-        # (this is for perf reasons, no need to create a >10MB gif every 2 minutes..)
-        next_update_datetime = current_gif.created + timedelta(hours=12)
-        if datetime.now() > next_update_datetime:
-            gif_data = create_gif(SUVI_304_IMAGES_DIRECTORY)
-            gif = Gif(gif_data, gif_frame.file_datetime)
-            return gif
+        return {
+            "latest_image": os.path.join(self.image_directory, "latest.png"),
+            "latest_image_updated": (
+                video_frame.file_datetime
+                if video_frame.saved
+                else (self.data or {}).get("latest_image_updated")
+            ),
+            "latest_video": video_path,
+        }
 
-        return current_gif
 
-
-class NOAASolarLascoC3UpdateCoordinator(NOAASolarUpdateCoordinator):
+class NOAASolarSuvi304UpdateCoordinator(NOAASolarVideoUpdateCoordinator):
     """Update handler."""
 
-    async def _fetch_data(self):
-        """Fetch new data."""
-        current_gif: Gif = self.data
-        image = await self.api.fetch_lasco_c3_image()
-        gif_frame = save_png_gif_frame(image, LASCO_C3_IMAGES_DIRECTORY)
+    stream_name = "suvi_304"
 
-        # nothing new, return created state
-        if current_gif and not gif_frame.saved:
-            return current_gif
+    async def _fetch_image(self) -> bytes:
+        """Fetch the latest SUVI 304 image."""
+        return await self.api.fetch_suvi_primary_304_image()
 
-        # handle case where gif was not yet created
-        if not current_gif:
-            gif_data = create_gif(LASCO_C3_IMAGES_DIRECTORY)
-            gif = Gif(gif_data, gif_frame.file_datetime)
-            return gif
 
-        # check if a gif update is due
-        # (this is for perf reasons, no need to create a >10MB gif every 2 minutes..)
-        next_update_datetime = current_gif.created + timedelta(hours=12)
-        if datetime.now() > next_update_datetime:
-            gif_data = create_gif(LASCO_C3_IMAGES_DIRECTORY)
-            gif = Gif(gif_data, gif_frame.file_datetime)
-            return gif
+class NOAASolarLascoC3UpdateCoordinator(NOAASolarVideoUpdateCoordinator):
+    """Update handler."""
 
-        return current_gif
+    stream_name = "lasco_c3"
+
+    async def _fetch_image(self) -> bytes:
+        """Fetch the latest LASCO C3 image."""
+        return await self.api.fetch_lasco_c3_image()

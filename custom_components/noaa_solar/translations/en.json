@@ -11,7 +11,8 @@
                 "data": {
                     "host": "The NOAA host url",
                     "data_scan_interval": "The poll interval (in seconds) for sensor update requests",
-                    "image_scan_interval": "The poll interval (in seconds) for image update requests"
+                    "image_scan_interval": "The poll interval (in seconds) for image update requests",
+                    "video_format": "The video format (GIF or MP4)"
                 },
                 "title": "Define your NOAA Solar settings"
             }
