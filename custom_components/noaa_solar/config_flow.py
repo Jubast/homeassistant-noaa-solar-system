@@ -1,12 +1,12 @@
 """Config flow for NOAA Solar integration."""
 
 from __future__ import annotations
-from typing import Any
+from typing import Any, Self
 
 import voluptuous as vol
 
 from homeassistant import config_entries
-from homeassistant.const import CONF_HOST
+from homeassistant.const import CONF_HOST, CONF_NAME
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers.selector import (
     SelectSelector,
@@ -33,6 +33,10 @@ def data_schema(user_input: dict[str, Any]) -> vol.Schema:
     """Prepare data schema for NOAA Solar configuration."""
     return vol.Schema(
         {
+            vol.Required(
+                CONF_NAME,
+                default=user_input.get(CONF_NAME, DEFAULT_NAME),
+            ): str,
             vol.Required(
                 CONF_HOST, default=user_input.get(CONF_HOST, DEFAULT_HOST)
             ): str,
@@ -64,6 +68,7 @@ def data_schema(user_input: dict[str, Any]) -> vol.Schema:
 def default_user_input() -> dict[str, Any]:
     """Prepare default user input."""
     user_input = {}
+    user_input[CONF_NAME] = DEFAULT_NAME
     user_input[CONF_HOST] = DEFAULT_HOST
     user_input[CONF_DATA_SCAN_INTERVAL] = DEFAULT_DATA_SCAN_INTERVAL
     user_input[CONF_IMAGE_SCAN_INTERVAL] = DEFAULT_IMAGE_SCAN_INTERVAL
@@ -99,22 +104,34 @@ class NOAASolarConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 3
 
     def __init__(self) -> None:
-        """Initialize the config flow."""
-        self._errors: dict = {}
+        """Initialize a NOAA Solar config flow."""
+        self.flow_host: str | None = None
+
+    def is_matching(self, other_flow: Self) -> bool:
+        """Return True if another in-progress flow targets the same host."""
+        return self.flow_host is not None and self.flow_host == getattr(
+            other_flow, "flow_host", None
+        )
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
         """Show config Form step."""
+        errors: dict[str, str] = {}
+
         if user_input is not None:
+            data = user_input_to_data(user_input)
+            self.flow_host = data[CONF_HOST].casefold()
+            await self.async_set_unique_id(self.flow_host)
+            self._abort_if_unique_id_configured()
             return self.async_create_entry(
-                title=DEFAULT_NAME,
-                data=user_input_to_data(user_input),
+                title=user_input.get(CONF_NAME, DEFAULT_NAME),
+                data=data,
             )
 
         user_input = default_user_input()
         return self.async_show_form(
             step_id="user",
             data_schema=data_schema(user_input),
-            errors=self._errors,
+            errors=errors,
         )

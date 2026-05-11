@@ -2,18 +2,18 @@
 
 from typing import Any
 from cachetools import TTLCache
-from aiohttp import ClientSession
 from homeassistant.helpers.update_coordinator import UpdateFailed
 
 
 class NOAASpaceApi:
     """NOAA API implementation."""
 
-    def __init__(self, url: str) -> None:
+    def __init__(self, url: str, session: Any) -> None:
         """Initialize NOAA space api."""
         # NOAA API always returns Cache-Control max-age:60, respect it and don't load their systems
         self.cache = TTLCache(maxsize=5, ttl=60)
         self.url = url
+        self._session = session
 
     async def fetch_solar_wind_mag_field(self) -> Any:
         """Fetch solar wind mag data."""
@@ -66,7 +66,7 @@ class NOAASpaceApi:
         if cached:
             return cached
 
-        async with ClientSession() as session, session.get(
+        async with self._session.get(
             url,
             headers=self.default_json_headers(),
         ) as resp:
@@ -85,7 +85,7 @@ class NOAASpaceApi:
         if cached:
             return cached
 
-        async with ClientSession() as session, session.get(
+        async with self._session.get(
             url,
             headers=self.default_image_headers(),
         ) as resp:

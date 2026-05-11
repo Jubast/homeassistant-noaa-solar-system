@@ -13,8 +13,8 @@
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/Jubast/homeassistant-noaa-solar-system/issues",
   "requirements": [
-    "Pillow>=10.1.0",
-    "cachetools>=5.3.2"
+    "Pillow>=12.1.1",
+    "cachetools>=7.1.1"
   ],
-  "version": "0.1.0"
+  "version": "0.2.0"
 }

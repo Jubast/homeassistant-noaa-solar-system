@@ -1,7 +1,6 @@
 {
     "name": "jubast/homeassistant-noaa-solar-system",
-    "context": "..",
-    "dockerFile": "../Dockerfile",
+    "image": "mcr.microsoft.com/devcontainers/base:debian",
     "postCreateCommand": "scripts/setup",
     "forwardPorts": [
         8123
@@ -36,5 +35,13 @@
             }
         }
     },
-    "remoteUser": "vscode"
+    "remoteUser": "vscode",
+    "features": {
+        "ghcr.io/devcontainers/features/python:1": {
+            "version": "3.14"
+        },
+        "ghcr.io/devcontainers-extra/features/apt-packages:1": {
+            "packages": "ffmpeg,libturbojpeg0,libpcap-dev"
+        }
+    }
 }

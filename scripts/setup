@@ -4,4 +4,6 @@ set -e
 
 cd "$(dirname "$0")/.."
 
+mkdir -p data/media
+
 python3 -m pip install --requirement requirements.txt
