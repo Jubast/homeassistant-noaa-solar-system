@@ -1,5 +1,7 @@
-# Homeassistant
-/config/
+# NOAA solar
+config/*
+data/*
+!config/configuration.yaml
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

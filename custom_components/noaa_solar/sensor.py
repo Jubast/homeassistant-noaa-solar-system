@@ -1,37 +1,30 @@
 """Platform for sensor integration."""
-from __future__ import annotations
-import logging
 
-from homeassistant.config_entries import ConfigEntry
+from __future__ import annotations
+
+from homeassistant.components.sensor import SensorEntity, SensorStateClass
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.update_coordinator import (
-    CoordinatorEntity,
-)
 
 from .coordinator import (
-    NOAASolarUpdateCoordinator,
     NOAASolarActivityUpdateCoordinator,
     NOAASolarMagFieldUpdateCoordinator,
     NOAASolarWindSpeedUpdateCoordinator,
 )
-
-from .const import DOMAIN
-
-_LOGGER = logging.getLogger(__name__)
+from .data import NOAASolarConfigEntry
+from .entity import NOAASolarEntity
+from .const import LOGGER
 
 
 async def async_setup_entry(
-    hass: HomeAssistant,
-    entry: ConfigEntry,
+    hass: HomeAssistant,  # noqa: ARG001
+    entry: NOAASolarConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Add NOAA Solar Sensor entities."""
-    _LOGGER.info("Setup NOAA Space Sensor Entities")
+    LOGGER.info("Setup NOAA Space Sensor Entities")
 
-    coordinators: dict[str, NOAASolarUpdateCoordinator] = hass.data[DOMAIN][
-        entry.entry_id
-    ]
+    coordinators = entry.runtime_data.coordinators
 
     for _, coordinator in coordinators.items():
         if isinstance(coordinator, NOAASolarMagFieldUpdateCoordinator):
@@ -45,93 +38,69 @@ async def async_setup_entry(
             async_add_entities([NOAASolarActivityEntity(coordinator)], True)
 
 
-class NOAASolarWindSpeedEntity(CoordinatorEntity):
+class NOAASolarWindSpeedEntity(NOAASolarEntity, SensorEntity):
     """Representation of NOAA Solar wind speed data."""
+
+    _attr_name = "NOAA Space Weather - Solar Wind Speed"
+    _attr_native_unit_of_measurement = "km/s"
+    _attr_state_class = SensorStateClass.MEASUREMENT
 
     def __init__(self, coordinator: NOAASolarWindSpeedUpdateCoordinator) -> None:
         """Initialize the NOAA Solar wind speed entity."""
-        super().__init__(coordinator)
+        super().__init__(coordinator, unique_id_suffix="wind_speed")
 
     @property
-    def name(self) -> str:
-        """Return the name of the sensor."""
-        return "NOAA Space Weather - Solar Wind Speed"
-
-    @property
-    def state(self) -> int:
+    def native_value(self) -> float | None:
         """Return the state of the sensor."""
         return self.coordinator.data["WindSpeed"]
 
-    @property
-    def unit_of_measurement(self) -> str:
-        """Return unit of measurement."""
-        return "km/sec"
 
-
-class NOAASolarMagFieldBtEntity(CoordinatorEntity):
+class NOAASolarMagFieldBtEntity(NOAASolarEntity, SensorEntity):
     """Representation NOAA Solar Magnetic Fields Bt data."""
+
+    _attr_name = "NOAA Space Weather - Solar Wind Magnetic Fields Bt"
+    _attr_native_unit_of_measurement = "nT"
+    _attr_state_class = SensorStateClass.MEASUREMENT
 
     def __init__(self, coordinator: NOAASolarMagFieldUpdateCoordinator) -> None:
         """Initialize the NOAA Solar Magnetic Fields Bt entity."""
-        super().__init__(coordinator)
+        super().__init__(coordinator, unique_id_suffix="mag_field_bt")
 
     @property
-    def name(self) -> str:
-        """Return the name of the sensor."""
-        return "NOAA Space Weather - Solar Wind Magnetic Fields Bt"
-
-    @property
-    def state(self) -> int:
+    def native_value(self) -> float | None:
         """Return the state of the sensor."""
         return self.coordinator.data["Bt"]
 
-    @property
-    def unit_of_measurement(self) -> str:
-        """Return unit of measurement."""
-        return "nT"
 
-
-class NOAASolarMagFieldBzEntity(CoordinatorEntity):
+class NOAASolarMagFieldBzEntity(NOAASolarEntity, SensorEntity):
     """Representation NOAA Solar Magnetic Fields Bz data."""
+
+    _attr_name = "NOAA Space Weather - Solar Wind Magnetic Fields Bz"
+    _attr_native_unit_of_measurement = "nT"
+    _attr_state_class = SensorStateClass.MEASUREMENT
 
     def __init__(self, coordinator: NOAASolarMagFieldUpdateCoordinator) -> None:
         """Initialize the NOAA Solar Magnetic fields Bz entity."""
-        super().__init__(coordinator)
+        super().__init__(coordinator, unique_id_suffix="mag_field_bz")
 
     @property
-    def name(self) -> str:
-        """Return the name of the sensor."""
-        return "NOAA Space Weather - Solar Wind Magnetic Fields Bz"
-
-    @property
-    def state(self) -> int:
+    def native_value(self) -> float | None:
         """Return the state of the sensor."""
         return self.coordinator.data["Bz"]
 
-    @property
-    def unit_of_measurement(self) -> str:
-        """Return unit of measurement."""
-        return "nT"
 
-
-class NOAASolarActivityEntity(CoordinatorEntity):
+class NOAASolarActivityEntity(NOAASolarEntity, SensorEntity):
     """Representation NOAA Solar activity data."""
+
+    _attr_name = "NOAA Space Weather - Solar Activity (10.7cm Flux)"
+    _attr_native_unit_of_measurement = "sfu"
+    _attr_state_class = SensorStateClass.MEASUREMENT
 
     def __init__(self, coordinator: NOAASolarActivityUpdateCoordinator) -> None:
         """Initialize the NOAA Solar activity entity."""
-        super().__init__(coordinator)
+        super().__init__(coordinator, unique_id_suffix="activity_flux")
 
     @property
-    def name(self) -> str:
-        """Return the name of the sensor."""
-        return "NOAA Space Weather - Solar Activity (10.7cm Flux)"
-
-    @property
-    def state(self) -> int:
+    def native_value(self) -> float | None:
         """Return the state of the sensor."""
         return self.coordinator.data["Flux"]
-
-    @property
-    def unit_of_measurement(self) -> str:
-        """Return unit of measurement."""
-        return "sfu"

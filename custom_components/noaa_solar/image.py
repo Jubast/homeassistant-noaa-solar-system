@@ -2,38 +2,29 @@
 
 from __future__ import annotations
 from datetime import datetime
-import logging
 
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.update_coordinator import (
-    CoordinatorEntity,
-)
 from homeassistant.components.image import ImageEntity
 
 from .coordinator import (
-    NOAASolarUpdateCoordinator,
-    NOAASolarSuvi304UpdateCoordinator,
     NOAASolarLascoC3UpdateCoordinator,
+    NOAASolarSuvi304UpdateCoordinator,
 )
-
-from .const import DOMAIN
-
-_LOGGER = logging.getLogger(__name__)
+from .const import LOGGER
+from .data import NOAASolarConfigEntry
+from .entity import NOAASolarEntity
 
 
 async def async_setup_entry(
-    hass: HomeAssistant,
-    entry: ConfigEntry,
+    hass: HomeAssistant,  # noqa: ARG001
+    entry: NOAASolarConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Add NOAA Solar Image entities."""
-    _LOGGER.info("Setup NOAA Space Image Entities")
+    LOGGER.info("Setup NOAA Space Image Entities")
 
-    coordinators: dict[str, NOAASolarUpdateCoordinator] = hass.data[DOMAIN][
-        entry.entry_id
-    ]
+    coordinators = entry.runtime_data.coordinators
 
     for _, coordinator in coordinators.items():
         if isinstance(coordinator, NOAASolarSuvi304UpdateCoordinator):
@@ -43,7 +34,7 @@ async def async_setup_entry(
             async_add_entities([NOAASolarLascoC3Entity(hass, coordinator)], True)
 
 
-class NOAASolarSuvi304Entity(ImageEntity, CoordinatorEntity):
+class NOAASolarSuvi304Entity(NOAASolarEntity, ImageEntity):
     """Representation of NOAA Suvi304 Primary images."""
 
     def __init__(
@@ -51,7 +42,7 @@ class NOAASolarSuvi304Entity(ImageEntity, CoordinatorEntity):
     ) -> None:
         """Initialize the NOAA Solar Suvi304 Image entity."""
         ImageEntity.__init__(self, hass)
-        CoordinatorEntity.__init__(self, coordinator)
+        NOAASolarEntity.__init__(self, coordinator, unique_id_suffix="suvi_304_image")
 
     @property
     def name(self) -> str:
@@ -82,7 +73,7 @@ class NOAASolarSuvi304Entity(ImageEntity, CoordinatorEntity):
             return None
 
 
-class NOAASolarLascoC3Entity(ImageEntity, CoordinatorEntity):
+class NOAASolarLascoC3Entity(NOAASolarEntity, ImageEntity):
     """Representation of NOAA LascoC3 Primary images."""
 
     def __init__(
@@ -90,7 +81,7 @@ class NOAASolarLascoC3Entity(ImageEntity, CoordinatorEntity):
     ) -> None:
         """Initialize the NOAA Solar LascoC3 entity."""
         ImageEntity.__init__(self, hass)
-        CoordinatorEntity.__init__(self, coordinator)
+        NOAASolarEntity.__init__(self, coordinator, unique_id_suffix="lasco_c3_image")
 
     @property
     def name(self) -> str:
