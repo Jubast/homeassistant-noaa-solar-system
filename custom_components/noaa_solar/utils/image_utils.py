@@ -20,7 +20,7 @@ class FrameRef:
 
 
 def list_frames_from_disk(image_directory: str) -> list[str]:
-    """Returns sorted (by datetime) images stored on the file system."""
+    """Return sorted (by datetime) images stored on the file system."""
     glob_path = join(image_directory, "*.png")
     # Exclude latest.png — it doesn't follow the hash_datetime naming scheme.
     glob_paths = [p for p in glob(glob_path) if basename(p) != "latest.png"]

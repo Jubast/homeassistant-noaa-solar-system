@@ -60,6 +60,7 @@ class NOAASolarSuvi304Entity(ImageEntity, CoordinatorEntity):
 
     @property
     def content_type(self) -> str:
+        """Return the content type."""
         return "image/png"
 
     @property
@@ -98,6 +99,7 @@ class NOAASolarLascoC3Entity(ImageEntity, CoordinatorEntity):
 
     @property
     def content_type(self) -> str:
+        """Return the content type."""
         return "image/png"
 
     @property
