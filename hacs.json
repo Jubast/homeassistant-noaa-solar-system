@@ -4,5 +4,5 @@
     "filename": "noaa_solar.zip",
     "render_readme": true,
     "hide_default_branch": true,
-    "homeassistant": "2026.3.2"
+    "homeassistant": "2026.6.0"
 }
