@@ -96,6 +96,12 @@ applyTo: "custom_components/noaa_solar/entity.py, custom_components/noaa_solar/s
 - Complex logic benefiting from testing
 - Device info customization, state formatting
 
+**Helper placement guidance:**
+
+- Keep tiny one-off pure formatting helpers local to the platform file
+- Move helpers to `utils/` when they do file/network I/O, are non-trivial, or are likely reusable
+- If a platform file accumulates multiple private helpers, move them to a focused `utils/` module to keep entity files readable
+
 **Import pattern:** `from ..utils.module import function`
 
 ## Type Hints

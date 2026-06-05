@@ -25,20 +25,27 @@ async def async_setup_entry(
     LOGGER.info("Setup NOAA Space Sensor Entities")
 
     coordinators = entry.runtime_data.coordinators
+    entities: list[SensorEntity] = []
 
     for _, coordinator in coordinators.items():
         if isinstance(coordinator, NOAASolarMagFieldUpdateCoordinator):
-            async_add_entities([NOAASolarMagFieldBtEntity(coordinator)], True)
-            async_add_entities([NOAASolarMagFieldBzEntity(coordinator)], True)
+            entities.extend(
+                [
+                    NOAASolarMagFieldBtEntity(coordinator),
+                    NOAASolarMagFieldBzEntity(coordinator),
+                ]
+            )
 
         if isinstance(coordinator, NOAASolarWindSpeedUpdateCoordinator):
-            async_add_entities([NOAASolarWindSpeedEntity(coordinator)], True)
+            entities.append(NOAASolarWindSpeedEntity(coordinator))
 
         if isinstance(coordinator, NOAASolarActivityUpdateCoordinator):
-            async_add_entities([NOAASolarActivityEntity(coordinator)], True)
+            entities.append(NOAASolarActivityEntity(coordinator))
+
+    async_add_entities(entities, True)
 
 
-class NOAASolarWindSpeedEntity(NOAASolarEntity, SensorEntity):
+class NOAASolarWindSpeedEntity(SensorEntity, NOAASolarEntity):
     """Representation of NOAA Solar wind speed data."""
 
     _attr_name = "NOAA Space Weather - Solar Wind Speed"
@@ -52,10 +59,10 @@ class NOAASolarWindSpeedEntity(NOAASolarEntity, SensorEntity):
     @property
     def native_value(self) -> float | None:
         """Return the state of the sensor."""
-        return self.coordinator.data["WindSpeed"]
+        return self.coordinator.data.get("WindSpeed")
 
 
-class NOAASolarMagFieldBtEntity(NOAASolarEntity, SensorEntity):
+class NOAASolarMagFieldBtEntity(SensorEntity, NOAASolarEntity):
     """Representation NOAA Solar Magnetic Fields Bt data."""
 
     _attr_name = "NOAA Space Weather - Solar Wind Magnetic Fields Bt"
@@ -69,10 +76,10 @@ class NOAASolarMagFieldBtEntity(NOAASolarEntity, SensorEntity):
     @property
     def native_value(self) -> float | None:
         """Return the state of the sensor."""
-        return self.coordinator.data["Bt"]
+        return self.coordinator.data.get("Bt")
 
 
-class NOAASolarMagFieldBzEntity(NOAASolarEntity, SensorEntity):
+class NOAASolarMagFieldBzEntity(SensorEntity, NOAASolarEntity):
     """Representation NOAA Solar Magnetic Fields Bz data."""
 
     _attr_name = "NOAA Space Weather - Solar Wind Magnetic Fields Bz"
@@ -86,10 +93,10 @@ class NOAASolarMagFieldBzEntity(NOAASolarEntity, SensorEntity):
     @property
     def native_value(self) -> float | None:
         """Return the state of the sensor."""
-        return self.coordinator.data["Bz"]
+        return self.coordinator.data.get("Bz")
 
 
-class NOAASolarActivityEntity(NOAASolarEntity, SensorEntity):
+class NOAASolarActivityEntity(SensorEntity, NOAASolarEntity):
     """Representation NOAA Solar activity data."""
 
     _attr_name = "NOAA Space Weather - Solar Activity (10.7cm Flux)"
@@ -103,4 +110,4 @@ class NOAASolarActivityEntity(NOAASolarEntity, SensorEntity):
     @property
     def native_value(self) -> float | None:
         """Return the state of the sensor."""
-        return self.coordinator.data["Flux"]
+        return self.coordinator.data.get("Flux")

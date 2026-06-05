@@ -40,6 +40,12 @@ def save_frame_to_disk(image: bytes, image_directory: str) -> FrameRef:
     return gif_frame
 
 
+def read_image_bytes_from_disk(path: str) -> bytes:
+    """Read image bytes from disk."""
+    with open(path, "rb") as file_handle:
+        return file_handle.read()
+
+
 def _save_image_if_not_exists(directory: str, data: bytes) -> FrameRef:
     image_hash = sha1(data).hexdigest()
     glob_path = join(directory, image_hash + "*.png")

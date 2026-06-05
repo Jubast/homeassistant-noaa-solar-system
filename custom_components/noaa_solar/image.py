@@ -1,11 +1,12 @@
 """Platform for image integration."""
 
 from __future__ import annotations
+
 from datetime import datetime
 
+from homeassistant.components.image import ImageEntity
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.components.image import ImageEntity
 
 from .coordinator import (
     NOAASolarLascoC3UpdateCoordinator,
@@ -14,6 +15,7 @@ from .coordinator import (
 from .const import LOGGER
 from .data import NOAASolarConfigEntry
 from .entity import NOAASolarEntity
+from .utils.image_utils import read_image_bytes_from_disk
 
 
 async def async_setup_entry(
@@ -34,7 +36,7 @@ async def async_setup_entry(
             async_add_entities([NOAASolarLascoC3Entity(hass, coordinator)], True)
 
 
-class NOAASolarSuvi304Entity(NOAASolarEntity, ImageEntity):
+class NOAASolarSuvi304Entity(ImageEntity, NOAASolarEntity):
     """Representation of NOAA Suvi304 Primary images."""
 
     def __init__(
@@ -43,11 +45,7 @@ class NOAASolarSuvi304Entity(NOAASolarEntity, ImageEntity):
         """Initialize the NOAA Solar Suvi304 Image entity."""
         ImageEntity.__init__(self, hass)
         NOAASolarEntity.__init__(self, coordinator, unique_id_suffix="suvi_304_image")
-
-    @property
-    def name(self) -> str:
-        """Return the name of the sensor."""
-        return "NOAA Space Weather - Suvi 304 Image"
+        self._attr_name = "NOAA Space Weather - Suvi 304 Image"
 
     @property
     def content_type(self) -> str:
@@ -61,19 +59,22 @@ class NOAASolarSuvi304Entity(NOAASolarEntity, ImageEntity):
             return None
         return self.coordinator.data.get("latest_image_updated")
 
-    def image(self) -> bytes | None:
+    async def async_image(self) -> bytes | None:
         """Return bytes of the latest downloaded frame."""
         if not self.coordinator.data:
             return None
-        latest = self.coordinator.data["latest_image"]
+        latest = self.coordinator.data.get("latest_image")
+        if latest is None:
+            return None
         try:
-            with open(latest, "rb") as f:
-                return f.read()
+            return await self.hass.async_add_executor_job(
+                read_image_bytes_from_disk, latest
+            )
         except FileNotFoundError:
             return None
 
 
-class NOAASolarLascoC3Entity(NOAASolarEntity, ImageEntity):
+class NOAASolarLascoC3Entity(ImageEntity, NOAASolarEntity):
     """Representation of NOAA LascoC3 Primary images."""
 
     def __init__(
@@ -82,11 +83,7 @@ class NOAASolarLascoC3Entity(NOAASolarEntity, ImageEntity):
         """Initialize the NOAA Solar LascoC3 entity."""
         ImageEntity.__init__(self, hass)
         NOAASolarEntity.__init__(self, coordinator, unique_id_suffix="lasco_c3_image")
-
-    @property
-    def name(self) -> str:
-        """Return the name of the sensor."""
-        return "NOAA Space Weather - Lasco C3 Image"
+        self._attr_name = "NOAA Space Weather - Lasco C3 Image"
 
     @property
     def content_type(self) -> str:
@@ -100,13 +97,16 @@ class NOAASolarLascoC3Entity(NOAASolarEntity, ImageEntity):
             return None
         return self.coordinator.data.get("latest_image_updated")
 
-    def image(self) -> bytes | None:
+    async def async_image(self) -> bytes | None:
         """Return bytes of the latest downloaded frame."""
         if not self.coordinator.data:
             return None
-        latest = self.coordinator.data["latest_image"]
+        latest = self.coordinator.data.get("latest_image")
+        if latest is None:
+            return None
         try:
-            with open(latest, "rb") as f:
-                return f.read()
+            return await self.hass.async_add_executor_job(
+                read_image_bytes_from_disk, latest
+            )
         except FileNotFoundError:
             return None
