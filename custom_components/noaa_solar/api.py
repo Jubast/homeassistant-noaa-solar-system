@@ -101,9 +101,18 @@ class NOAASpaceApi:
                     headers=self.default_json_headers(),
                 ) as resp:
                     self._raise_for_status(url, resp)
-                    json = await resp.json()
-                    self._cache[url] = json
-                    return json
+                    try:
+                        payload = await resp.json()
+                    except ValueError as err:
+                        response_preview = (await resp.text(errors="replace")).strip()[
+                            :200
+                        ]
+                        raise NOAASolarApiClientCommunicationError(
+                            f"Invalid JSON from {url}: {response_preview!r}"
+                        ) from err
+
+                    self._cache[url] = payload
+                    return payload
         except TimeoutError as err:
             raise NOAASolarApiClientCommunicationError(
                 f"Timeout while requesting {url}"

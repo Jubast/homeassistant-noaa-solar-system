@@ -50,6 +50,8 @@ class NOAASolarUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             raise UpdateFailed(f"API rate limit reached.{detail}") from err
         except NOAASolarApiClientCommunicationError as err:
             raise UpdateFailed(str(err)) from err
+        except (IndexError, KeyError, TypeError, ValueError) as err:
+            raise UpdateFailed(f"Invalid NOAA payload: {err}") from err
 
     @abstractmethod
     async def _fetch_data(self) -> dict[str, Any]:
