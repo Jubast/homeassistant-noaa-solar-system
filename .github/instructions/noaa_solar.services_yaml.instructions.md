@@ -110,12 +110,12 @@ turn_on:
 
 ## Related Files
 
-Service action implementations are in `custom_components/ha_integration_domain/service_actions/`.
+Service action implementations are in `custom_components/noaa_solar/service_actions/`.
 
 ## Validation
 
 ```bash
-script/yaml-check   # yamllint — catches YAML syntax and style errors
+scripts/lint   # yamllint — catches YAML syntax and style errors
 ```
 
 Service action schemas are also validated by Home Assistant on integration load.

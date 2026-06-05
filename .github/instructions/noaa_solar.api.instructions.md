@@ -1,5 +1,5 @@
 ---
-applyTo: "custom_components/**/api/**/*.py, custom_components/**/coordinator/**/*.py"
+applyTo: "custom_components/noaa_solar/api.py, custom_components/noaa_solar/coordinator.py"
 ---
 
 # API and Coordinator Instructions
@@ -57,11 +57,11 @@ applyTo: "custom_components/**/api/**/*.py, custom_components/**/coordinator/**/
 
 ## Exception Hierarchy (REQUIRED)
 
-Define in `api/__init__.py`:
+Define in `api.py`:
 
-- `IntegrationBlueprintApiClientError` (Base)
-- `IntegrationBlueprintApiClientCommunicationError` (Network, timeout, HTTP errors)
-- `IntegrationBlueprintApiClientAuthenticationError` (401, 403, invalid credentials)
+- `NOAASolarApiClientError` (Base)
+- `NOAASolarApiClientCommunicationError` (Network, timeout, HTTP errors)
+- `NOAASolarApiClientAuthenticationError` (401, 403, invalid credentials)
 - Optional: `ApiClientRateLimitError(retry_after)` for rate limiting
 
 **Mapping:** HTTP 401/403 → Auth, HTTP 429 → RateLimit, Timeout/ClientError → Communication
@@ -128,10 +128,10 @@ See [Integration Setup Failures](https://developers.home-assistant.io/docs/integ
 
 **Split large modules (~200-400 lines per file):**
 
-- `coordinator/base.py` - Core coordinator
+- `coordinator.py` - Core coordinator
 - `coordinator/data_processing.py` - Transform helpers
 - `coordinator/error_handling.py` - Recovery logic
-- `api/client.py` - Main client
+- `api.py` - Main client
 - `api/auth.py` - Auth helpers (OAuth, token refresh)
 - `api/endpoints/` - Grouped endpoints (if many)
 

@@ -1,5 +1,5 @@
 ---
-applyTo: "custom_components/**/service_actions/**/*.py"
+applyTo: "custom_components/noaa_solar/service_actions/**/*.py, custom_components/noaa_solar/__init__.py"
 ---
 
 # Service Actions Instructions
@@ -23,7 +23,7 @@ applyTo: "custom_components/**/service_actions/**/*.py"
 **Implementation structure:**
 
 - Call `await async_setup_services(hass)` from `async_setup()` in `__init__.py`
-- Implement handlers in `service_actions/__init__.py`
+- Implement handlers in `service_actions/` when this package exists, or keep service setup directly in `__init__.py` for simple integrations
 - Handlers iterate over `hass.data[DOMAIN]` to access config entries
 
 ## Service Schema

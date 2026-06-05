@@ -19,10 +19,10 @@ If not provided, ask for:
 
 **Entity Implementation:**
 
-- Create entity file in appropriate platform directory
-- Inherit from `IntegrationBlueprintEntity` and platform base class
+- Add the entity class in the appropriate platform module (for example `sensor.py` or `image.py`)
+- Inherit from `NOAASolarEntity` and platform base class
 - Ensure `device_info` property returns same identifiers as other entities on this device
-- Coordinate device_info generation via `entity_utils/device_info.py` helper
+- Coordinate device_info generation via shared helper(s) in `utils/` when needed
 
 **Device Grouping:**
 
@@ -33,7 +33,7 @@ If not provided, ask for:
 
 **Platform Registration:**
 
-- Add entity to platform's entity list in `[platform]/__init__.py`
+- Add entity setup/registration in the platform module where `async_setup_entry` is defined
 - Maintain alphabetical order if applicable
 - Ensure entity description includes all required fields
 
@@ -62,13 +62,12 @@ If not provided, ask for:
 - Follow existing entity patterns for this device
 - Use consistent naming scheme for entity_id
 - Add proper docstrings (Google-style)
-- Run `script/check` to validate before completion
+- Run `scripts/lint` to validate before completion
 
 **Related Files:**
 
-- Entity: `custom_components/ha_integration_domain/[platform]/[entity_name].py`
-- Platform: `custom_components/ha_integration_domain/[platform]/__init__.py`
-- Device Info Helper: `entity_utils/device_info.py`
+- Platform module: `custom_components/noaa_solar/[platform].py`
+- Shared helpers: `custom_components/noaa_solar/utils/`
 - Translations: `translations/*.json`
 - Documentation: Reference [#file:docs/development/ARCHITECTURE.md]
 

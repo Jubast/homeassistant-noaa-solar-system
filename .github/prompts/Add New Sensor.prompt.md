@@ -20,8 +20,8 @@ If not provided, ask for:
 
 **Entity Implementation:**
 
-- Create new sensor file in `custom_components/ha_integration_domain/sensor/`
-- Inherit from `IntegrationBlueprintEntity` and `SensorEntity`
+- Add the new sensor class in `custom_components/noaa_solar/sensor.py`
+- Inherit from `NOAASolarEntity` and `SensorEntity`
 - Use `SensorEntityDescription` for static metadata
 - Implement `native_value` property to return sensor value from coordinator data
 - Add proper type hints for all methods and properties
@@ -48,7 +48,7 @@ If not provided, ask for:
 **Entity Template:**
 
 ```python
-"""[Sensor description] for Integration Blueprint."""
+"""[Sensor description] for NOAA Solar."""
 
 from __future__ import annotations
 
@@ -62,12 +62,12 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import [UNIT_CONSTANT]  # e.g., PERCENTAGE, UnitOfTemperature
 from homeassistant.core import callback
 
-from ..coordinator import IntegrationBlueprintDataUpdateCoordinator
-from ..entity import IntegrationBlueprintEntity
+from ..coordinator import NOAASolarDataUpdateCoordinator
+from ..entity import NOAASolarEntity
 
 
-class IntegrationBlueprint[SensorName]Sensor(
-    IntegrationBlueprintEntity,
+class NOAASolar[SensorName]Sensor(
+    NOAASolarEntity,
     SensorEntity,
 ):
     """Sensor for [description]."""
@@ -85,7 +85,7 @@ class IntegrationBlueprint[SensorName]Sensor(
 
     def __init__(
         self,
-        coordinator: IntegrationBlueprintDataUpdateCoordinator,
+        coordinator: NOAASolarDataUpdateCoordinator,
         entry: ConfigEntry,
     ) -> None:
         """Initialize the sensor."""
@@ -104,9 +104,9 @@ class IntegrationBlueprint[SensorName]Sensor(
 - `TOTAL_INCREASING`: Monotonically increasing counter (energy consumed, data uploaded)
 - `TOTAL`: Like TOTAL_INCREASING but resets are allowed (daily counter)
 
-**Platform Registration (Modern Pattern):**
+**Platform Registration (Current Repository Pattern):**
 
-In `sensor/__init__.py`, use tuple of EntityDescription:
+In `sensor.py`, register the new sensor in `async_setup_entry` and keep metadata in descriptions/constants where practical:
 
 ```python
 from homeassistant.components.sensor import SensorEntityDescription
@@ -144,16 +144,15 @@ async def async_setup_entry(
 
 **Code Quality:**
 
-- Follow existing sensor patterns (see `sensor/*.py` for examples)
+- Follow existing sensor patterns (see `sensor.py` for examples)
 - Use constants from `const.py` for keys
 - Add proper docstrings (Google-style)
-- Run `script/check` to validate before completion
+- Run `scripts/lint` to validate before completion
 
 **Related Files:**
 
-- Entity: `custom_components/ha_integration_domain/sensor/[sensor_name].py`
-- Platform: `custom_components/ha_integration_domain/sensor/__init__.py`
-- Translations: `custom_components/ha_integration_domain/translations/*.json`
+- Entity and platform setup: `custom_components/noaa_solar/sensor.py`
+- Translations: `custom_components/noaa_solar/translations/*.json`
 - Documentation: Reference [#file:docs/development/ARCHITECTURE.md]
 
 **DO NOT create tests unless explicitly requested.**

@@ -1,5 +1,5 @@
 ---
-applyTo: "custom_components/**/alarm_control_panel/**/*.py, custom_components/**/binary_sensor/**/*.py, custom_components/**/button/**/*.py, custom_components/**/camera/**/*.py, custom_components/**/climate/**/*.py, custom_components/**/cover/**/*.py, custom_components/**/fan/**/*.py, custom_components/**/humidifier/**/*.py, custom_components/**/light/**/*.py, custom_components/**/lock/**/*.py, custom_components/**/number/**/*.py, custom_components/**/select/**/*.py, custom_components/**/sensor/**/*.py, custom_components/**/siren/**/*.py, custom_components/**/switch/**/*.py, custom_components/**/vacuum/**/*.py, custom_components/**/water_heater/**/*.py, custom_components/**/entity/**/*.py, custom_components/**/entity_utils/**/*.py"
+applyTo: "custom_components/noaa_solar/entity.py, custom_components/noaa_solar/sensor.py, custom_components/noaa_solar/image.py, custom_components/noaa_solar/utils/**/*.py"
 ---
 
 # Entity Platform Instructions
@@ -8,19 +8,19 @@ applyTo: "custom_components/**/alarm_control_panel/**/*.py, custom_components/**
 
 ## Shared Infrastructure
 
-- **`entity/`** - Base entity classes (inherit `IntegrationBlueprintEntity` from `entity/base.py`)
-- **`entity_utils/`** - Shared utilities (device info, state helpers) used by 3+ entity classes
+- **`entity/`** - Base entity classes (inherit `NOAASolarEntity` from `entity.py`)
+- **`utils/`** - Shared utilities (device info, state helpers) used by 3+ entity classes
 - **`coordinator/`** - Data fetching (entities never call API directly)
 
 ## Base Entity Inheritance
 
-**MUST inherit from:** `(PlatformEntity, IntegrationBlueprintEntity)` - order matters for MRO
+**MUST inherit from:** `(PlatformEntity, NOAASolarEntity)` - order matters for MRO
 
 **Base class provides:** Coordinator integration, device info, unique ID (`{entry_id}_{description.key}`), attribution, entity naming
 
 **You implement:** Platform-specific properties/methods (`native_value`, `is_on`, `async_press`, etc.)
 
-**Imports pattern:** `from homeassistant.components.PLATFORM import PlatformEntity, PlatformEntityDescription` + `from ..entity import IntegrationBlueprintEntity`
+**Imports pattern:** `from homeassistant.components.PLATFORM import PlatformEntity, PlatformEntityDescription` + `from ..entity import NOAASolarEntity`
 
 **Constructor:** Call `super().__init__(coordinator, entity_description)` - base handles setup
 
@@ -90,13 +90,13 @@ applyTo: "custom_components/**/alarm_control_panel/**/*.py, custom_components/**
 
 ## Entity Utilities
 
-**Add to `entity_utils/` when:**
+**Add to `utils/` when:**
 
 - Used by 3+ entity classes
 - Complex logic benefiting from testing
 - Device info customization, state formatting
 
-**Import pattern:** `from ..entity_utils.module import function`
+**Import pattern:** `from ..utils.module import function`
 
 ## Type Hints
 
@@ -106,7 +106,7 @@ applyTo: "custom_components/**/alarm_control_panel/**/*.py, custom_components/**
 from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from ..coordinator import IntegrationBlueprintDataUpdateCoordinator
+    from ..coordinator import NOAASolarDataUpdateCoordinator
 ```
 
 ## PARALLEL_UPDATES
@@ -139,4 +139,4 @@ if TYPE_CHECKING:
 - Generate unique IDs from `entry_id + description.key`
 - Log only in async methods or `__init__`
 - Consult HA docs for platform-specific patterns
-- Use `entity_utils/` for shared logic
+- Use `utils/` for shared logic

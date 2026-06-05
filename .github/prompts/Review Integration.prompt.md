@@ -21,9 +21,7 @@ If not provided, ask for:
 Run all validation tools first:
 
 ```bash
-script/check           # Type checking + linting + spell check
-script/lint-check      # Read-only lint check
-script/type-check      # Pyright only
+scripts/lint           # Ruff lint/fix for repository Python code
 ```
 
 Report any errors found. Fix critical issues before proceeding.
@@ -40,7 +38,7 @@ Report any errors found. Fix critical issues before proceeding.
 
 **Entity Organization:**
 
-- [ ] Entities inherit from both platform base and `IntegrationBlueprintEntity`
+- [ ] Entities inherit from both platform base and `NOAASolarEntity`
 - [ ] `_attr_has_entity_name = True` for all new entities (MANDATORY 2025)
 - [ ] Entity names use `translation_key` instead of hardcoded `name`
 - [ ] Entity IDs are stable (won't change on restart)
@@ -123,7 +121,7 @@ requests.get(url)
 
 **Naming Conventions:**
 
-- [ ] Classes use `PascalCase` with `IntegrationBlueprint` prefix
+- [ ] Classes use `PascalCase` with `NOAASolar` prefix
 - [ ] Functions and variables use `snake_case`
 - [ ] Constants use `UPPER_SNAKE_CASE`
 - [ ] Private members have `_leading_underscore`
@@ -358,8 +356,8 @@ Create report in `.ai-scratch/review-report.md`:
 
 ## Integration Context
 
-- **Domain:** `ha_integration_domain`
-- **Class prefix:** `IntegrationBlueprint`
+- **Domain:** `noaa_solar`
+- **Class prefix:** `NOAASolar`
 - **Instructions:** `.github/instructions/*.instructions.md`
 - **Guidelines:** `AGENTS.md`, `CONTRIBUTING.md`
 

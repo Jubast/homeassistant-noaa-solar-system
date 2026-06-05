@@ -20,16 +20,16 @@ If not provided, ask for:
 
 **Schema Definition:**
 
-- Add to appropriate schema in `config_flow_handler/schemas/`
+- Add to the appropriate form schema in `custom_components/noaa_solar/config_flow.py`
 - Use voluptuous validators from `homeassistant.helpers.config_validation as cv`
 - Use selectors for better UI (BooleanSelector, NumberSelector, etc.)
 - Set appropriate default values with `vol.Optional()`
 
 **Config Flow Logic:**
 
-- Update flow step in `config_flow_handler/config_flow.py` or `options_flow.py`
+- Update the flow step in `custom_components/noaa_solar/config_flow.py`
 - Handle new field in `async_step_[step_name]()` method
-- Validate input if needed (add validator to `validators/` if complex)
+- Validate input in `config_flow.py` (or shared helper in `utils/` if reused)
 - Store value in `config_entry.data` or `config_entry.options`
 
 **Using the Option:**
@@ -54,7 +54,7 @@ If not provided, ask for:
 
 **Migration (if changing existing config):**
 
-- Increment `VERSION` in config flow handler
+- Increment `VERSION` in config flow handler when needed
 - Implement `async_migrate_entry()` if needed
 - Handle both old and new format for backwards compatibility
 
@@ -63,13 +63,12 @@ If not provided, ask for:
 - Follow existing config flow patterns
 - Use proper selector types for best UX
 - Add proper type hints
-- Run `script/check` to validate before completion
+- Run `scripts/lint` to validate before completion
 
 **Related Files:**
 
-- Schemas: `config_flow_handler/schemas/`
-- Flow Handler: `config_flow_handler/config_flow.py` or `options_flow.py`
-- Validators: `config_flow_handler/validators/`
+- Flow Handler and schemas: `custom_components/noaa_solar/config_flow.py`
+- Shared validation helpers: `custom_components/noaa_solar/utils/`
 - Constants: `const.py`
 - Translations: `translations/*.json`
 

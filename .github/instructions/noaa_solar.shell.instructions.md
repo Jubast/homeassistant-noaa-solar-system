@@ -1,10 +1,10 @@
 ---
-applyTo: "script/**, .devcontainer/*.sh"
+applyTo: "scripts/**, .devcontainer/*.sh"
 ---
 
 # Shell Script Instructions
 
-**Applies to:** Shell scripts in `script/` (extensionless by convention) and `**/.devcontainer/*.sh`
+**Applies to:** Shell scripts in `scripts/` (extensionless by convention) and `**/.devcontainer/*.sh`
 
 ## Formatting Standards
 
@@ -18,25 +18,25 @@ applyTo: "script/**, .devcontainer/*.sh"
 ```bash
 #!/bin/bash
 
-# script/name: One-line description
+# scripts/name: One-line description
 #
 # Longer description if needed.
 #
 # Usage:
-#   ./script/name [args]
+#   ./scripts/name [args]
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$SCRIPT_DIR/.."
 
-# shellcheck source=script/.lib/output.sh
+# shellcheck source=scripts/.lib/output.sh
 source "$SCRIPT_DIR/.lib/output.sh"
 ```
 
 ## Key Conventions
 
-- Source `script/.lib/output.sh` for colored output and `activate_venv()`
+- Source `scripts/.lib/output.sh` for colored output and `activate_venv()`
 - Use `activate_venv` (no `source .../activate` inline) to enter the Python venv
 - Use `log_header`, `log_success`, `log_error` for consistent output
 - Quote all variable references: `"$var"` not `$var`
@@ -66,12 +66,12 @@ Common rules:
 **Recommended workflow — run fix scripts first:**
 
 ```bash
-script/shell        # shfmt -i 4 -w  (auto-formats; silent on success)
-script/shell-check  # shfmt -d + shellcheck -x  (reports remaining issues)
+scripts/lint        # shfmt -i 4 -w  (auto-formats; silent on success)
+scripts/lint  # shfmt -d + shellcheck -x  (reports remaining issues)
 ```
 
-`script/shell` fixes formatting but does not run shellcheck (no auto-fix available).
-Always follow with `script/shell-check` to catch logic and style issues.
+`scripts/lint` fixes formatting but does not run shellcheck (no auto-fix available).
+Always follow with `scripts/lint` to catch logic and style issues.
 
 **Suppressing shellcheck for an entire file** (use only in library scripts):
 

@@ -1,5 +1,5 @@
 ---
-applyTo: "custom_components/**/config_flow_handler/**/*.py, custom_components/**/config_flow.py"
+applyTo: "custom_components/noaa_solar/config_flow.py"
 ---
 
 # Config Flow Instructions
@@ -41,19 +41,19 @@ Understanding the relationship between these components is essential:
 
 **Where Data Entry Flow is actually used:**
 
-1. **Config Flow** (`config_flow_handler/config_flow.py`):
+1. **Config Flow** (`custom_components/noaa_solar/config_flow.py`):
    - User adds integration → shows forms → collects input → creates `ConfigEntry`
    - Methods like `async_show_form()`, `async_create_entry()` are Data Entry Flow
 
-2. **Options Flow** (`config_flow_handler/options_flow.py`):
+2. **Options Flow** (`custom_components/noaa_solar/config_flow.py`):
    - User changes settings → shows forms → collects input → updates `ConfigEntry.options`
 
-3. **Subentry Flow** (`config_flow_handler/subentry_flow.py`):
+3. **Subentry Flow** (`custom_components/noaa_solar/config_flow.py`):
    - User adds sub-devices → shows forms → collects input → creates sub-entries
 
-4. **Repair Flow** (`repairs.py` - separate from config_flow_handler):
+4. **Repair Flow** (`repairs.py` - separate from config flow):
    - User fixes issues → shows forms → collects input → resolves problem
-   - See `blueprint.repairs.instructions.md` for Repair Flow patterns (different architecture)
+   - See `noaa_solar.repairs.instructions.md` for Repair Flow patterns (different architecture)
 
 **Common confusion - Data Entry Flow vs. data.py:**
 
@@ -74,7 +74,7 @@ Understanding the relationship between these components is essential:
 2. User enters host/credentials → **Data Entry Flow** validates and collects input
 3. `ConfigEntry` created with data/options → stored in `.storage/core.config_entries`
 4. `async_setup_entry()` runs → creates runtime objects (client, coordinator)
-5. `entry.runtime_data = IntegrationBlueprintData(...)` → stores runtime objects (from `data.py`)
+5. `entry.runtime_data = NOAASolarData(...)` → stores runtime objects (from `data.py`)
 6. Integration operates using `entry.runtime_data.coordinator`, `entry.runtime_data.client`
 
 ## Data Entry Flow Fundamentals
@@ -135,13 +135,9 @@ Every step method must return one of these result types (see [Data Entry Flow do
 
 ## File Organization
 
-- Place config flow in `config_flow_handler/config_flow.py`
-- Place options flow in `config_flow_handler/options_flow.py`
-- Place subentry flow in `config_flow_handler/subentry_flow.py` (if needed)
-- Place shared logic in `config_flow_handler/handler.py`
-- Place schemas in `config_flow_handler/schemas/*.py`
-- Place validators in `config_flow_handler/validators/*.py`
-- **MUST** maintain `config_flow.py` at integration root (hassfest requirement) that imports from package
+- Place config flow logic in `custom_components/noaa_solar/config_flow.py`
+- Keep helper validation/schema logic close to config flow (same module or `utils/` if reused)
+- **MUST** keep `config_flow.py` at integration root (hassfest requirement)
 
 ## Step Names
 

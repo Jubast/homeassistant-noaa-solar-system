@@ -110,7 +110,7 @@ If not provided, ask for:
 - JSON must be valid (no trailing commas, proper quotes)
 - All keys in English file should exist in other language files
 - Maintain identical structure across language files
-- Run `script/check` to validate JSON syntax
+- Run `scripts/lint` to validate JSON syntax
 
 **German Translation Tips:**
 
@@ -121,14 +121,14 @@ If not provided, ask for:
 
 **Related Files:**
 
-- English: [#file:custom_components/ha_integration_domain/translations/en.json]
-- German: [#file:custom_components/ha_integration_domain/translations/de.json]
+- English: [#file:custom_components/noaa_solar/translations/en.json]
+- German: [#file:custom_components/noaa_solar/translations/de.json]
 - Schema: [#file:schemas/json/translation_schema.json]
 - Documentation: Reference [#file:.github/instructions/translations.instructions.md]
 
 ## Before Finishing
 
-- Validate JSON syntax with `script/check`
+- Validate JSON syntax with `scripts/lint`
 - Restart Home Assistant to load new translations
 - Verify translations appear correctly in UI
 - Check all affected screens (config, options, entities, actions)

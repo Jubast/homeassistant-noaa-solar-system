@@ -12,7 +12,7 @@ Your goal is to diagnose and fix issues with the data update coordinator.
 
 **Data Not Updating:**
 
-- Check coordinator update interval in `coordinator/base.py`
+- Check coordinator update interval in `coordinator.py`
 - Verify `async_update_data()` is actually fetching new data
 - Look for exceptions in Home Assistant logs
 - Check if API client is returning stale data
@@ -49,13 +49,13 @@ Your goal is to diagnose and fix issues with the data update coordinator.
      ```yaml
      logger:
        logs:
-         custom_components.ha_integration_domain: debug
+         custom_components.noaa_solar: debug
      ```
 
-   - Restart Home Assistant: `./script/develop`
+   - Restart Home Assistant: `./scripts/develop`
 
 2. **Check Logs:**
-   - Look at terminal output where `./script/develop` is running
+   - Look at terminal output where `./scripts/develop` is running
    - Or check `config/home-assistant.log`
    - Search for error traces and `UpdateFailed` exceptions
 
@@ -106,7 +106,7 @@ def native_value(self) -> float | None:
 **Adjust Update Interval:**
 
 ```python
-# In coordinator/base.py
+# In coordinator.py
 super().__init__(
     hass,
     _LOGGER,
@@ -117,15 +117,15 @@ super().__init__(
 
 ## Related Files to Review
 
-- [#file:custom_components/ha_integration_domain/coordinator/base.py]
-- [#file:custom_components/ha_integration_domain/api/client.py]
-- [#file:custom_components/ha_integration_domain/entity/base.py]
+- [#file:custom_components/noaa_solar/coordinator.py]
+- [#file:custom_components/noaa_solar/api.py]
+- [#file:custom_components/noaa_solar/entity.py]
 - [#file:config/configuration.yaml] - for log levels
 - [#file:config/home-assistant.log] - for error traces
 
 ## Before Finishing
 
-- Run `script/check` to validate code quality
+- Run `scripts/lint` to validate code quality
 - Restart Home Assistant to test fixes
 - Monitor logs for any remaining errors
 - Verify entities update correctly and stay available

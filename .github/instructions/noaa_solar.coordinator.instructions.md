@@ -1,10 +1,10 @@
 ---
-applyTo: "custom_components/**/coordinator/**/*.py, custom_components/**/api/**/*.py"
+applyTo: "custom_components/noaa_solar/coordinator.py, custom_components/noaa_solar/api.py"
 ---
 
 # Coordinator Instructions
 
-**Applies to:** Coordinator implementation files (always sent together with `blueprint.api.instructions.md`)
+**Applies to:** Coordinator implementation files (always sent together with `noaa_solar.api.instructions.md`)
 
 ## Using the Coordinator
 

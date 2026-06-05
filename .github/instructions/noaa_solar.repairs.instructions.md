@@ -15,7 +15,7 @@ Repair Flows guide users through fixing issues (expired credentials, deprecated 
 
 **Key differences from Config Flow:**
 
-- **Location**: `repairs.py` in integration root (NOT in `config_flow_handler/`)
+- **Location**: `repairs.py` in integration root (NOT inside config flow modules)
 - **Base class**: `homeassistant.components.repairs.RepairsFlow` (NOT `ConfigFlow`)
 - **Trigger**: System creates issue → user clicks "Fix" → Repair Flow runs
 - **Purpose**: Fix existing problems, not create new config entries
@@ -167,7 +167,7 @@ async def async_step_init(self, user_input=None):
 
 **MUST:**
 
-- Place `repairs.py` in integration root (NOT in `config_flow_handler/`)
+- Place `repairs.py` in integration root (NOT inside config flow modules)
 - Implement `async_create_fix_flow()` function returning `RepairsFlow` subclass
 - Delete issue after successful repair: `ir.async_delete_issue()`
 - Set `is_fixable=True` only if repair flow exists
@@ -183,7 +183,7 @@ async def async_step_init(self, user_input=None):
 
 **NEVER:**
 
-- Put repair flows in `config_flow_handler/` (separate system)
+- Put repair flows inside config flow modules (separate system)
 - Leave issues after repair completes (always delete)
 - Use repair flows for normal config changes (use reconfigure instead)
 - Create issues without translations

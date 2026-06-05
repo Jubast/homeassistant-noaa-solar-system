@@ -6,13 +6,13 @@
 
 ## Project Identity
 
-- **Domain:** `ha_integration_domain`
-- **Title:** Integration Blueprint
-- **Class prefix:** `IntegrationBlueprint`
-- **Main code:** `custom_components/ha_integration_domain/`
-- **Validate:** `script/check` (type-check + lint-check + spell-check)
-- **Start HA:** `./script/develop` (kills existing, starts on port 8123)
-- **Force restart:** `pkill -f "hass --config" || true && pkill -f "debugpy.*5678" || true && ./script/develop`
+- **Domain:** `noaa_solar`
+- **Title:** NOAA Solar
+- **Class prefix:** `NOAASolar`
+- **Main code:** `custom_components/noaa_solar/`
+- **Validate:** `scripts/lint`
+- **Start HA:** `./scripts/develop`
+- **Setup deps:** `./scripts/setup`
 
 Use these exact identifiers throughout the codebase. Never hardcode different values.
 
@@ -22,58 +22,50 @@ Use these exact identifiers throughout the codebase. Never hardcode different va
 - **YAML:** 2 spaces, modern Home Assistant syntax (no legacy `platform:` style)
 - **JSON:** 2 spaces, no trailing commas, no comments
 
-Before considering any coding task complete, the following **must** pass:
+Before considering any coding task complete:
 
 ```bash
-script/check      # Runs type-check + lint-check + spell-check
+scripts/lint      # Ruff format + lint with auto-fix
 ```
 
-Generate code that passes these checks on first run. As an AI agent, you should produce higher quality code than manual development. Aim for zero validation errors.
+Generate code that passes these checks on first run.
 
-## Architecture (Quick Reference)
+## Current Architecture
 
-**Data Flow:** Entities → Coordinator → API Client (never skip layers)
+**Data flow:** Entities -> Coordinator -> API Client (never skip layers)
 
-**Package Structure (DO NOT create other packages):**
+**Current flat module structure (do NOT restructure without approval):**
 
-- `coordinator/` — DataUpdateCoordinator (base + data_processing + error_handling + listeners)
-- `api/` — External API client (async aiohttp)
-- `entity/` — Base entity class (`IntegrationBlueprintEntity`)
-- `entity_utils/` — Entity-specific helpers (device_info, state formatting)
-- `config_flow_handler/` — Config flow with `schemas/` and `validators/` subdirs
-- `[platform]/` — One directory per platform (sensor, switch, etc.), one class per file
-- `service_actions/` — Service action implementations
-- `utils/` — Integration-wide utilities
+- `api.py` - External API client (`NOAASpaceApi`, async aiohttp)
+- `coordinator.py` - All data update coordinators (`NOAASolarUpdateCoordinator` and subclasses)
+- `config_flow.py` - Config flow handler (`NOAASolarConfigFlowHandler`)
+- `entity.py` - Base entity class (`NOAASolarEntity`)
+- `sensor.py` - Sensor entities
+- `image.py` - Image entities
+- `utils/` - Integration-wide utilities
 
-**Forbidden packages:** `helpers/`, `ha_helpers/`, `common/`, `shared/`, `lib/` — use `utils/` or `entity_utils/` instead. Do NOT create new top-level packages without explicit approval.
+**Forbidden package names:** `helpers/`, `ha_helpers/`, `common/`, `shared/`, `lib/` — use `utils/` instead.
 
-**Key patterns** (details in path-specific `*.instructions.md`):
+**Key patterns:**
 
-- Entity MRO: `(PlatformEntity, IntegrationBlueprintEntity)` — order matters
-- Unique ID: `{entry_id}_{description.key}` (set in base entity)
-- Services: register in `async_setup()`, NOT `async_setup_entry()` (Quality Scale requirement)
-- Config entry data: `entry.runtime_data.client` / `entry.runtime_data.coordinator`
+- Entity MRO: `(PlatformEntity, NOAASolarEntity)` — order matters
+- Unique IDs: `{entry_id}_{suffix}` per entity
+- Services: register in `async_setup()`, NOT `async_setup_entry()`
+- Config entry runtime data: `entry.runtime_data`
 
 ## Workflow Rules
 
 1. **Small, focused changes** — avoid large refactorings unless explicitly requested
 2. **Implement features completely** — even if spanning 5-8 files
-   - Example: New sensor needs entity class + platform init + descriptions → implement all together
-   - Example: Bug fix touching coordinator + entity + error handling → do all at once
+   - Example: New sensor needs entity class + coordinator data + translations -> implement all together
+   - Example: Bug fix touching coordinator + entity + error handling -> do all at once
 3. **Multiple independent features:** implement one at a time, suggest commit between each
-4. **Large refactoring (>10 files or architectural changes):** propose plan first, get explicit confirmation
-5. **Validation:** run `script/check` before considering task complete
-6. **File size:** keep files at ~200-400 lines. Split large modules into smaller ones when needed.
+4. **Large refactoring:** propose plan first, get explicit confirmation
+5. **Validation:** run `scripts/lint` before considering task complete
 
-**Important: Do NOT write tests unless explicitly requested.** Focus on implementing functionality. The developer decides when and if tests are needed.
+**Do NOT write tests unless explicitly requested.**
 
-**Translation strategy:**
-
-- Business logic first, translations later
-- Update `en.json` only when asked or at major feature completion
-- NEVER update other language files automatically — extremely time-consuming
-- Ask before updating multiple translation files
-- Use placeholders in code (e.g., `"config.step.user.title"`) — functionality works without translations
+**Translation strategy:** Business logic first, translations later. Update `en.json` only when asked or at major feature completion. Never update other language files automatically.
 
 ## Research First
 
@@ -81,66 +73,32 @@ Generate code that passes these checks on first run. As an AI agent, you should 
 
 1. Search [Home Assistant Developer Docs](https://developers.home-assistant.io/) for current patterns
 2. Check the [developer blog](https://developers.home-assistant.io/blog/) for recent changes
-3. Look at existing patterns in similar files in the integration (e.g., existing sensor implementations)
-4. Search: `site:developers.home-assistant.io [your question]` for official guidance
-5. Run `script/check` early and often — catch issues before they compound
-6. Consult [Ruff rules](https://docs.astral.sh/ruff/rules/) or [Pyright docs](https://microsoft.github.io/pyright/) when validation fails
-7. Ask for clarification rather than implementing based on assumptions
+3. Look at existing patterns in similar files in this integration
+4. Run `scripts/lint` early and often — catch issues before they compound
 
 **Home Assistant evolves rapidly** — verify current best practices rather than relying on outdated knowledge.
 
 ## Local Development
 
-**Always use the project's scripts** — do NOT craft your own `hass`, `pip`, `pytest`, or similar commands. The scripts handle environment setup, virtual environments, port management, and cleanup that raw commands miss. Agents that bypass scripts frequently break.
-
-**Devcontainer CLI tools:** The devcontainer provides common agent-facing CLI tools including `bat`, `delta`/`git-delta`, `eza`, `fd`/`fdfind`, `fzf`, `http`/`httpie`, `hyperfine`, `ipython`, `jq`, `jo`, `mlr`/`miller`, `rg`/`ripgrep`, `shellcheck`, `shfmt`, `sponge`, `sqlite3`, `tree`, `yq`, and `yamllint`. Prefer these explicit container tools over assuming a VS Code extension exposes an equivalent CLI on `PATH`.
-
-**CLI compatibility notes:** Some commands are available via compatibility aliases because Debian package names differ from what agents often expect. Prefer `bat`, `fd`, `git-delta`, `httpie`, `ipython`, `miller`, and `ripgrep` as stable spellings. `yq` is installed as the Mike Farah variant, so standard `yq eval`/`yq e` syntax is expected.
-
 **Start Home Assistant:**
 
 ```bash
-./script/develop
+./scripts/develop
 ```
 
 **Force restart (when HA is unresponsive or port conflicts):**
 
 ```bash
-pkill -f "hass --config" || true && pkill -f "debugpy.*5678" || true && ./script/develop
+pkill -f "hass --config" || true && pkill -f "debugpy.*5678" || true && ./scripts/develop
 ```
 
-**When to restart HA:** After modifying Python files, `manifest.json`, `services.yaml`, translations, or config flow changes
-
-**Validate changes — choose the most specific script for your changes:**
-
-| Changed files                          | Run this                              |
-| -------------------------------------- | ------------------------------------- |
-| `*.py` only                            | `script/python` + `script/type-check` |
-| `*.yaml` / `*.yml` only                | `script/yaml-check`                   |
-| `*.md` only                            | `script/markdown`                     |
-| `script/` or `.devcontainer/*.sh` only | `script/shell` + `script/shell-check` |
-| Multiple types or unsure               | `script/lint` + `script/type-check`   |
-
-**Recommended workflow — fix scripts output already shows what they couldn't fix:**
-
-Fix-mode scripts auto-heal files **and** print remaining errors in their output.
-No separate check-run is needed after — the exit code and output are the complete picture.
-
-```bash
-# Repeat until both exit 0:
-script/lint         # Fixes Python + shell + markdown; checks yaml + shellcheck; shows all remaining
-script/type-check   # Pyright — no auto-fix ever
-# Fix remaining issues from output, then repeat.
-```
-
-> `script/check`, `script/lint-check`, `script/python-check` are **check-only** (no file writes).
-> Use them in CI/CD. AI agents should always use fix-mode scripts to benefit from auto-healing.
+**When to restart HA:** After modifying Python files, `manifest.json`, `services.yaml`, translations, or config flow changes.
 
 **Logs:**
 
-- Live: terminal where `./script/develop` runs
+- Live: terminal where `./scripts/develop` runs
 - File: `config/home-assistant.log` (most recent), `config/home-assistant.log.1` (previous)
-- Debug level: `custom_components.ha_integration_domain: debug` in `config/configuration.yaml`
+- Debug level: `custom_components.noaa_solar: debug` in `config/configuration.yaml`
 
 ## Working With the Developer
 
@@ -151,23 +109,16 @@ script/type-check   # Pyright — no auto-fix ever
 3. Suggest updating instructions if this is a permanent change
 4. Proceed after confirmation
 
-**Maintaining instructions:**
-
-- This project is evolving — instructions should too
-- Suggest updates when patterns change
-- Remove outdated rules, don't just add new ones
-
 **Documentation rules:**
 
-- ❌ **NEVER** create markdown files without explicit permission
-- ❌ **NEVER** create "helpful" READMEs, GUIDE.md, NOTES.md, etc.
-- ❌ **NEVER** create documentation in `.github/` unless it's a GitHub-specified file
-- ✅ **ALWAYS ask first** before creating permanent documentation
-- ✅ **Prefer module/class/function docstrings** over separate markdown files
-- ✅ **Prefer extending** existing docs over creating new files
-- ✅ **Use `.ai-scratch/`** for temporary planning and notes (never committed)
-- Developer docs → `docs/development/` (ASK FIRST)
-- User docs → `docs/user/` (ASK FIRST)
+- NEVER create markdown files without explicit permission
+- NEVER create "helpful" READMEs, GUIDE.md, NOTES.md, etc.
+- NEVER create documentation in `.github/` unless it's a GitHub-specified file
+- ALWAYS ask first before creating permanent documentation
+- Prefer module/class/function docstrings over separate markdown files
+- Use `.ai-scratch/` for temporary planning and notes (never committed)
+- Developer docs go in `docs/development/` (ask first)
+- User docs go in `docs/user/` (ask first)
 
 **Session management:**
 
@@ -176,7 +127,7 @@ script/type-check   # Pyright — no auto-fix ever
 - Offer to create summary for fresh session if context is strained
 - Suggest once, don't nag if declined
 
-**Commit format:** [Conventional Commits](https://www.conventionalcommits.org/) — see `.github/instructions/blueprint.commit-message.instructions.md` for full conventions, types, scopes, and examples.
+**Commit format:** [Conventional Commits](https://www.conventionalcommits.org/) — see `.github/instructions/noaa_solar.commit-message.instructions.md` for full conventions, types, scopes, and examples.
 
 **Always check `git diff` first** — don't rely on session memory. Include all changes in your message.
 
@@ -185,3 +136,9 @@ script/type-check   # Pyright — no auto-fix ever
 - **Never commit automatically** — only commit when the developer explicitly requests it
 - A previous commit request is NOT a standing permission; each commit requires a fresh explicit instruction
 - **Never ask about pushing** — the developer always handles `git push` themselves; do not offer or suggest it
+
+## Instructions Layout
+
+Path-specific instruction files are in `.github/instructions/noaa_solar.*.instructions.md`.
+
+When structure changes, update instruction files so their `applyTo` globs still match real files.

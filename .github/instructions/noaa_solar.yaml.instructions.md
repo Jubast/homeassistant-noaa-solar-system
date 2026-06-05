@@ -39,11 +39,11 @@ Consult the relevant schema when editing YAML files to ensure correct structure.
 
 ## Validation
 
-Run `script/yaml-check` after editing YAML files. yamllint has no auto-fix mode — all
+Run `scripts/lint` after editing YAML files. yamllint has no auto-fix mode — all
 errors require manual fixes.
 
 ```bash
-script/yaml-check   # yamllint against integration YAML, schemas, .github/
+scripts/lint   # yamllint against integration YAML, schemas, .github/
 ```
 
 Configuration: `.yamllint.yml` at the project root. Key rules:

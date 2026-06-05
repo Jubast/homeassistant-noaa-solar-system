@@ -64,7 +64,7 @@ Break down into logical phases (typically 3-5):
 - [ ] Error handling implemented
 - [ ] Translations added (en, de)
 - [ ] Docstrings updated
-- [ ] `script/check` passes
+- [ ] `scripts/lint` passes
 - [ ] Manual testing completed
 - [ ] Breaking changes documented (if any)
 
@@ -97,7 +97,7 @@ Break down into logical phases (typically 3-5):
 
 3. **Implementation Phase:**
    - Work through phases sequentially
-   - Run `script/check` after each phase
+   - Run `scripts/lint` after each phase
    - Test functionality before moving to next phase
    - Mark phases complete in plan file
 
@@ -129,9 +129,9 @@ Break down into logical phases (typically 3-5):
 
 **Integration-specific considerations:**
 
-- Domain: `ha_integration_domain`
-- Title: Integration Blueprint
-- Class prefix: `IntegrationBlueprint`
+- Domain: `noaa_solar`
+- Title: NOAA Solar
+- Class prefix: `NOAASolar`
 - Follow patterns in `AGENTS.md` and path-specific `.instructions.md`
 
 ## Example Phase Structure
@@ -141,8 +141,8 @@ Break down into logical phases (typically 3-5):
 
 **Files to modify:**
 
-- `custom_components/ha_integration_domain/sensor/__init__.py`
-- `custom_components/ha_integration_domain/sensor/new_sensor.py` (create)
+- `custom_components/noaa_solar/sensor.py`
+- `custom_components/noaa_solar/sensor.pynew_sensor.py` (create)
 
 **Changes:**
 

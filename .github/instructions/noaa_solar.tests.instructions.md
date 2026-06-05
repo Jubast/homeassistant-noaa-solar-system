@@ -40,7 +40,7 @@ tests/
 
 - `hass` - Mock Home Assistant instance
 - `config_entry` - `MockConfigEntry` from `pytest-homeassistant-custom-component`
-- `coordinator` - IntegrationBlueprintDataUpdateCoordinator
+- `coordinator` - NOAASolarDataUpdateCoordinator
 - `mock_api_client` - Mocked API client
 
 **Define fixtures in `conftest.py`:** Use `MockConfigEntry` from `pytest-homeassistant-custom-component`
@@ -48,7 +48,7 @@ tests/
 **Use [Syrupy](https://github.com/tophat/syrupy) for large outputs:**
 
 - Snapshots for: Entity states, registry entries, diagnostics, config flow results
-- Update: `script/test --snapshot-update`, commit `.ambr` files
+- Update: `scripts/lint --snapshot-update`, commit `.ambr` files
 - Complement functional tests, don't replace them
 - Pattern: `assert hass.states.get("sensor.x") == snapshot`
 
@@ -96,13 +96,13 @@ Verify: `result["type"]` (form/create_entry/abort), `result["step_id"]`, `result
 ## Test Commands
 
 ```bash
-script/test                    # All tests
-script/test -v                 # Verbose
-script/test --cov-html         # Coverage report (htmlcov/index.html)
-script/test tests/sensor/      # Specific directory
-script/test -k test_sensor     # Pattern matching
-script/test -m unit            # Marker filtering
-script/test --snapshot-update  # Update snapshots
+scripts/lint                    # All tests
+scripts/lint -v                 # Verbose
+scripts/lint --cov-html         # Coverage report (htmlcov/index.html)
+scripts/lint tests/sensor/      # Specific directory
+scripts/lint -k test_sensor     # Pattern matching
+scripts/lint -m unit            # Marker filtering
+scripts/lint --snapshot-update  # Update snapshots
 ```
 
 ## Rules
@@ -140,4 +140,4 @@ script/test --snapshot-update  # Update snapshots
 **Coverage targets:**
 
 - Coordinator logic, config flow validation, error handling, entity state calculations
-- Check: `script/test --cov-html`
+- Check: `scripts/lint --cov-html`

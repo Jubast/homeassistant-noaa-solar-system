@@ -43,7 +43,7 @@ sensor/
 **Naming:**
 
 - Files: `snake_case.py`
-- Classes: `PascalCase` prefixed with `IntegrationBlueprint`
+- Classes: `PascalCase` prefixed with `NOAASolar`
 - Functions/methods: `snake_case`
 - Constants: `UPPER_SNAKE_CASE`
 
@@ -176,7 +176,7 @@ See [Integration Setup Failures](https://developers.home-assistant.io/docs/integ
 
 **Structure requirements:**
 
-- Inherit from both platform entity and `IntegrationBlueprintEntity` (order matters)
+- Inherit from both platform entity and `NOAASolarEntity` (order matters)
 - Set `_attr_unique_id` in `__init__` (format: `{entry_id}_{key}`)
 - Use coordinator data only - Never call API directly
 - Handle unavailability via `_attr_available`
@@ -213,7 +213,7 @@ If you are asked to write tests for entities:
 
 import pytest
 
-from custom_components.ha_integration_domain.sensor import async_setup_entry
+from custom_components.noaa_solar.sensor import async_setup_entry
 
 @pytest.mark.unit
 async def test_sensor_setup(hass, config_entry, coordinator):
@@ -223,7 +223,7 @@ async def test_sensor_setup(hass, config_entry, coordinator):
 
 ## Common Patterns
 
-**Config entry data:** `entry_data: IntegrationBlueprintData = hass.data[DOMAIN][entry.entry_id]`
+**Config entry data:** `entry_data: NOAASolarData = hass.data[DOMAIN][entry.entry_id]`
 
 **Device info:** Provided via base entity class (manufacturer, model, serial, config URL, firmware)
 
@@ -232,8 +232,8 @@ async def test_sensor_setup(hass, config_entry, coordinator):
 **Recommended workflow — run fix scripts first, they report what they couldn't fix:**
 
 ```bash
-script/python       # Ruff format + ruff check --fix — output shows remaining errors
-script/type-check   # Pyright — no auto-fix, always manual
+scripts/lint       # Ruff format + ruff check --fix — output shows remaining errors
+scripts/lint   # Pyright — no auto-fix, always manual
 ```
 
 Repeat until both exit 0. Only manually edit files for errors that remain in the output.

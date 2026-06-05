@@ -17,19 +17,21 @@ If not provided, ask for:
 
 ## Implementation Steps
 
-### 1. Create Platform Directory Structure
+### 1. Choose Platform File Strategy
 
-**Directory:** `custom_components/ha_integration_domain/[platform]/`
+This repository currently uses flat platform modules.
 
-**Files to create:**
+**Preferred locations:**
 
-- `__init__.py` - Platform setup and entity list
-- `[entity_name].py` - Individual entity implementation(s)
+- `custom_components/noaa_solar/sensor.py`
+- `custom_components/noaa_solar/image.py`
 
-### 2. Platform `__init__.py` Template
+If a new platform is needed, either add it as a flat module (for example `custom_components/noaa_solar/switch.py`) or create a package only when complexity justifies it.
+
+### 2. Platform Setup Template
 
 ```python
-"""[Platform] platform for Integration Blueprint."""
+"""[Platform] platform for NOAA Solar."""
 
 from __future__ import annotations
 
@@ -38,10 +40,10 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .entity import IntegrationBlueprintEntity
-from .[entity_file] import IntegrationBlueprint[EntityName]
+from .entity import NOAASolarEntity
+from .[entity_file] import NOAASolar[EntityName]
 from .const import DOMAIN
-from .coordinator import IntegrationBlueprintDataUpdateCoordinator
+from .coordinator import NOAASolarDataUpdateCoordinator
 
 
 async def async_setup_entry(
@@ -50,13 +52,13 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up [platform] platform."""
-    coordinator: IntegrationBlueprintDataUpdateCoordinator = hass.data[DOMAIN][
+    coordinator: NOAASolarDataUpdateCoordinator = hass.data[DOMAIN][
         entry.entry_id
     ]
 
     async_add_entities(
         [
-            IntegrationBlueprint[EntityName](coordinator, entry),
+            NOAASolar[EntityName](coordinator, entry),
             # Add more entities here
         ]
     )
@@ -65,7 +67,7 @@ async def async_setup_entry(
 ### 3. Entity Implementation Template
 
 ```python
-"""[Entity description] for Integration Blueprint."""
+"""[Entity description] for NOAA Solar."""
 
 from __future__ import annotations
 
@@ -78,12 +80,12 @@ from homeassistant.components.[platform] import (
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import callback
 
-from .coordinator import IntegrationBlueprintDataUpdateCoordinator
-from .entity import IntegrationBlueprintEntity
+from .coordinator import NOAASolarDataUpdateCoordinator
+from .entity import NOAASolarEntity
 
 
-class IntegrationBlueprint[EntityName](
-    IntegrationBlueprintEntity,
+class NOAASolar[EntityName](
+    NOAASolarEntity,
     [PlatformEntityClass],
 ):
     """Representation of [entity description]."""
@@ -100,7 +102,7 @@ class IntegrationBlueprint[EntityName](
 
     def __init__(
         self,
-        coordinator: IntegrationBlueprintDataUpdateCoordinator,
+        coordinator: NOAASolarDataUpdateCoordinator,
         entry: ConfigEntry,
     ) -> None:
         """Initialize the [entity]."""
@@ -129,7 +131,7 @@ class IntegrationBlueprint[EntityName](
 
 ### 4. Update Manifest
 
-Add platform to `custom_components/ha_integration_domain/manifest.json`:
+Add platform to `custom_components/noaa_solar/manifest.json`:
 
 ```json
 {
@@ -174,8 +176,8 @@ Add platform to `custom_components/ha_integration_domain/manifest.json`:
 Run validation and test:
 
 ```bash
-script/check           # Type checking and linting
-script/develop         # Start Home Assistant for testing
+scripts/lint           # Type checking and linting
+scripts/develop         # Start Home Assistant for testing
 ```
 
 ## Platform-Specific Guidance
@@ -236,15 +238,15 @@ script/develop         # Start Home Assistant for testing
 ```python
 from homeassistant.helpers.device_registry import DeviceInfo
 
-class IntegrationBlueprint[EntityName](
-    IntegrationBlueprintEntity,
+class NOAASolar[EntityName](
+    NOAASolarEntity,
     [PlatformEntityClass],
 ):
     """Entity with device grouping."""
 
     def __init__(
         self,
-        coordinator: IntegrationBlueprintDataUpdateCoordinator,
+        coordinator: NOAASolarDataUpdateCoordinator,
         entry: ConfigEntry,
     ) -> None:
         """Initialize entity."""
@@ -290,8 +292,8 @@ async def async_press(self) -> None:
 
 ## Validation Checklist
 
-- [ ] Platform directory created with `__init__.py`
-- [ ] Entity class inherits from both `IntegrationBlueprintEntity` and platform class
+- [ ] Platform setup added in the appropriate module
+- [ ] Entity class inherits from both `NOAASolarEntity` and platform class
 - [ ] `_attr_has_entity_name = True` set (MANDATORY for new integrations)
 - [ ] Entity uses `translation_key` instead of hardcoded `name`
 - [ ] Unique ID set correctly
@@ -300,17 +302,17 @@ async def async_press(self) -> None:
 - [ ] Device info consistent if multiple entities per device
 - [ ] Type hints complete
 - [ ] Docstrings added
-- [ ] `script/check` passes
+- [ ] `scripts/lint` passes
 - [ ] Entity appears in HA UI with correct name
 - [ ] State updates correctly
 - [ ] No errors in logs
 
 ## Integration Context
 
-- **Domain:** `ha_integration_domain`
-- **Class prefix:** `IntegrationBlueprint`
-- **Base entity:** `IntegrationBlueprintEntity` in `entity/base.py`
-- **Coordinator:** `IntegrationBlueprintDataUpdateCoordinator`
+- **Domain:** `noaa_solar`
+- **Class prefix:** `NOAASolar`
+- **Base entity:** `NOAASolarEntity` in `entity.py`
+- **Coordinator:** `NOAASolarDataUpdateCoordinator`
 
 Follow patterns from existing platforms in the integration for consistency.
 
@@ -318,7 +320,7 @@ Follow patterns from existing platforms in the integration for consistency.
 
 After implementation:
 
-1. Run `script/check` to validate
-2. Start Home Assistant with `script/develop`
+1. Run `scripts/lint` to validate
+2. Start Home Assistant with `scripts/develop`
 3. Verify entity appears and functions correctly
 4. Report results and any issues found
