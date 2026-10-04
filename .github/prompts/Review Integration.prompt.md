@@ -74,6 +74,7 @@ async def async_setup_entry(
 ) -> bool:
     """Set up integration."""
 
+
 # ❌ Bad - Missing types
 async def async_setup_entry(hass, entry):
     """Set up integration."""
@@ -108,6 +109,7 @@ async with aiohttp.ClientSession() as session:
 
 # ❌ Bad - Blocking I/O or deprecated timeout
 import async_timeout  # DEPRECATED - use asyncio.timeout()
+
 time.sleep(5)
 requests.get(url)
 ```

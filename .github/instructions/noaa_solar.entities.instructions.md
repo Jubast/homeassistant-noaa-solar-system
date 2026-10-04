@@ -111,6 +111,7 @@ applyTo: "custom_components/noaa_solar/entity.py, custom_components/noaa_solar/s
 ```python
 from __future__ import annotations
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from ..coordinator import NOAASolarDataUpdateCoordinator
 ```
