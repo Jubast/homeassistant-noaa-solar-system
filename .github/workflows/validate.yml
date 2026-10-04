@@ -20,7 +20,13 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Run hassfest validation
-        uses: home-assistant/actions/hassfest@868e6cb4607727d764341a158d98872cd63fa658 # master
+        run: |
+          version=$(sed -n 's/^homeassistant==//p' requirements.txt)
+          if [ -z "$version" ]; then
+            echo "::error::homeassistant version not found in requirements.txt"
+            exit 1
+          fi
+          docker run --rm -v "$PWD":/github/workspace "ghcr.io/home-assistant/hassfest:$version"
 
   hacs: # https://github.com/hacs/action
     name: HACS validation
